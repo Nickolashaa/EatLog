@@ -1,6 +1,6 @@
+from PyQt6.QtCore import QRectF, Qt, QTimer
+from PyQt6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPen
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtGui import QPainter, QColor, QPainterPath, QPen, QBrush
-from PyQt6.QtCore import Qt, QRectF, QTimer
 
 
 class FlaskLoader(QWidget):
