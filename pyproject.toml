@@ -9,3 +9,6 @@ dependencies = [
     "pyqt6>=6.11.0",
     "ruff>=0.15.11",
 ]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
