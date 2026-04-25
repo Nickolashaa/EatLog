@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QRectF, Qt, QTimer
-from PyQt6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPen
+from PyQt6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPaintEvent, QPen
 from PyQt6.QtWidgets import QWidget
 
 
@@ -65,21 +65,21 @@ class FlaskLoader(QWidget):
             self.height(),
         )
 
-    def _draw_background(self, p: QPainter, rect: QRectF):
+    def _draw_background(self, p: QPainter, rect: QRectF) -> None:
         p.setBrush(self.background_color)
         p.drawRoundedRect(rect, self.border_radius, self.border_radius)
 
-    def _draw_fill(self, p: QPainter, filled_rect: QRectF):
+    def _draw_fill(self, p: QPainter, filled_rect: QRectF) -> None:
         if filled_rect.height() > 0:
             p.setBrush(self.fill_color)
             p.drawRect(filled_rect)
 
-    def _draw_border(self, p: QPainter, rect: QRectF):
+    def _draw_border(self, p: QPainter, rect: QRectF) -> None:
         p.setPen(QPen(QBrush(self.border_color), self.border_width))
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawRoundedRect(rect, self.border_radius, self.border_radius)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QPaintEvent | None) -> None:
         rect = self._calculate_main_rect()
         filled_rect = self._calculate_filled_rect()
 
