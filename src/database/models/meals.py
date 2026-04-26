@@ -10,7 +10,7 @@ class Meal(Base):
     __tablename__ = "meals"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    title: Mapped[str]
+    title: Mapped[str] = mapped_column(unique=True)
     calories: Mapped[float]
     protein: Mapped[float]
     fat: Mapped[float]
