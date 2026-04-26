@@ -2,17 +2,19 @@ from PyQt6.QtCore import QRectF, Qt, QTimer
 from PyQt6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPaintEvent, QPen
 from PyQt6.QtWidgets import QWidget
 
+from src.config import QSS_COLORS
+
 
 class FlaskLoader(QWidget):
     def __init__(
         self,
         parent: QWidget | None,
         fill: int = 0,
-        fill_color: QColor = QColor(0, 255, 0),
+        fill_color: str = QSS_COLORS["success"],
         border_width: int = 5,
         border_radius: int = 20,
-        border_color: QColor = QColor(0, 0, 0),
-        background_color: QColor = QColor(255, 255, 255),
+        border_color: str = QSS_COLORS["border"],
+        background_color: str = QSS_COLORS["bg_elevated"],
     ):
         super().__init__(parent=parent)
         self.border_width = border_width
@@ -21,9 +23,9 @@ class FlaskLoader(QWidget):
             raise ValueError(f"fill must be between 0 and 100, got {fill}")
         self.current_fill = fill
         self.target_fill = fill
-        self.background_color = background_color
-        self.border_color = border_color
-        self.fill_color = fill_color
+        self.background_color = QColor(background_color)
+        self.border_color = QColor(border_color)
+        self.fill_color = QColor(fill_color)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._tick)
         self.timer.start(16)

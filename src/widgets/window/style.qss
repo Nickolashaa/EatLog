@@ -1,0 +1,26 @@
+QMainWindow {
+    background-color: @bg;
+}
+
+QTabWidget::pane {
+    background-color: @bg;
+    border: 1px solid @border;
+}
+
+QTabBar::tab {
+    background-color: @bg_secondary;
+    color: @text_muted;
+    padding: 8px 18px;
+    border: none;
+}
+
+QTabBar::tab:selected {
+    background-color: @bg_elevated;
+    color: @text;
+    border-bottom: 2px solid @primary;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: @bg_elevated;
+    color: @text;
+}
