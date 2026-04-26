@@ -2,7 +2,7 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session
 
 from ...database.models.meals import Meal
-from ...exceptions import ObjectNotFound
+from ..exceptions import ObjectNotFound
 from .types import MealCreateParams, MealUpdateParams
 
 
