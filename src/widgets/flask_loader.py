@@ -6,18 +6,15 @@ from PyQt6.QtWidgets import QWidget
 class FlaskLoader(QWidget):
     def __init__(
         self,
-        width: int,
-        height: int,
-        border_width: int,
-        border_radius: int,
         parent: QWidget | None,
         fill: int = 0,
-        background_color: QColor = QColor(255, 255, 255),
-        border_color: QColor = QColor(0, 0, 0),
         fill_color: QColor = QColor(0, 255, 0),
+        border_width: int = 5,
+        border_radius: int = 20,
+        border_color: QColor = QColor(0, 0, 0),
+        background_color: QColor = QColor(255, 255, 255),
     ):
         super().__init__(parent=parent)
-        self.setFixedSize(width, height)
         self.border_width = border_width
         self.border_radius = border_radius
         if not (0 <= fill <= 100):
