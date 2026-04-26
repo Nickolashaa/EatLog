@@ -1,10 +1,11 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
-from ..config import HEIGHT, TITLE, WIDTH
-from .daily_report import DailyReport
+from ...config import HEIGHT, TITLE, WIDTH
+from ..daily_report import DailyReport
+from ..utils import load_style
 
 
-class EatLog(QMainWindow):
+class EatLogWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
@@ -18,3 +19,4 @@ class EatLog(QMainWindow):
         )
 
         self.setCentralWidget(self.tabs)
+        self.setStyleSheet(load_style(__file__))
