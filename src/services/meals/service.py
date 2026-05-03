@@ -24,8 +24,10 @@ class MealService:
     @staticmethod
     def get_list(
         session: Session,
+        search_query: str,
+        limit: int = 5,
     ) -> list[Meal]:
-        stmt = select(Meal)
+        stmt = select(Meal).where(Meal.title.icontains(search_query)).limit(limit)
         res = session.execute(stmt)
         return list(res.scalars().all())
 
