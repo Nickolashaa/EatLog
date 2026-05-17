@@ -2,7 +2,7 @@ from PyQt6.QtCore import QRectF, Qt, QTimer
 from PyQt6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPaintEvent, QPen
 from PyQt6.QtWidgets import QWidget
 
-from src.config import QSS_COLORS
+from ..config import QSS_COLORS
 
 
 class FlaskLoader(QWidget):
@@ -34,6 +34,10 @@ class FlaskLoader(QWidget):
         if not (0 <= fill <= 100):
             raise ValueError(f"fill must be between 0 and 100, got {fill}")
         self.target_fill = fill
+
+    def set_fill_color(self, color: str) -> None:
+        self.fill_color = QColor(color)
+        self.update()
 
     def _update_fill(self) -> None:
         if self.current_fill < self.target_fill:

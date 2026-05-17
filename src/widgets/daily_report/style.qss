@@ -1,4 +1,0 @@
-#DailyReport {
-    background-color: @bg_secondary;
-    border-left: 1px solid @border;
-}

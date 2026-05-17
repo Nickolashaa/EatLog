@@ -1,8 +1,0 @@
-QLabel {
-    color: @text;
-    background-color: @bg_elevated;
-    font-size: 15px;
-    font-weight: bold;
-    padding: 8px 14px;
-    border-radius: 6px;
-}
