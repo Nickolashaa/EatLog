@@ -1,4 +1,4 @@
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, insert, or_, select, update
 from sqlalchemy.orm import Session
 
 from ...database.models.meals import Meal
@@ -8,10 +8,7 @@ from .types import MealCreateParams, MealUpdateParams
 
 class MealService:
     @staticmethod
-    def get(
-        session: Session,
-        id: int,
-    ) -> Meal:
+    def get(session: Session, id: int) -> Meal:
         stmt = select(Meal).where(Meal.id == id)
         res = session.execute(stmt)
         instance = res.scalar_one_or_none()
@@ -24,28 +21,32 @@ class MealService:
     @staticmethod
     def get_list(
         session: Session,
-        search_query: str,
-        limit: int = 5,
+        search_query: str = "",
+        limit: int | None = None,
     ) -> list[Meal]:
-        stmt = select(Meal).where(Meal.title.icontains(search_query)).limit(limit)
+        stmt = select(Meal).order_by(Meal.title)
+        if search_query:
+            stmt = stmt.where(
+                or_(
+                    Meal.title.icontains(search_query),
+                    Meal.title.icontains(search_query.lower()),
+                    Meal.title.icontains(search_query.upper()),
+                    Meal.title.icontains(search_query.capitalize()),
+                )
+            )
+        if limit is not None:
+            stmt = stmt.limit(limit)
         res = session.execute(stmt)
         return list(res.scalars().all())
 
     @staticmethod
-    def create(
-        session: Session,
-        values: MealCreateParams,
-    ) -> Meal:
+    def create(session: Session, values: MealCreateParams) -> Meal:
         stmt = insert(Meal).values(values).returning(Meal)
         res = session.execute(stmt)
         return res.scalar_one()
 
     @staticmethod
-    def update(
-        session: Session,
-        id: int,
-        values: MealUpdateParams,
-    ) -> Meal:
+    def update(session: Session, id: int, values: MealUpdateParams) -> Meal:
         stmt = update(Meal).where(Meal.id == id).values(values).returning(Meal)
         res = session.execute(stmt)
         instance = res.scalar_one_or_none()
@@ -56,9 +57,6 @@ class MealService:
         return instance
 
     @staticmethod
-    def delete(
-        session: Session,
-        id: int,
-    ) -> None:
+    def delete(session: Session, id: int) -> None:
         stmt = delete(Meal).where(Meal.id == id)
         session.execute(stmt)
