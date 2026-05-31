@@ -1,3 +1,7 @@
+import os
+
+API_URL = os.getenv("EATLOG_API_URL", "http://localhost:8000")
+
 WIDTH = 1280
 HEIGHT = 720
 TITLE = "🥪 EAT LOG 🥪"
