@@ -1,7 +1,7 @@
 services:
   api:
-    build: .
-    env_file: .env
+    build: ./api/
+    env_file: ./api/.env
     ports:
       - "8000:8000"
     healthcheck:
