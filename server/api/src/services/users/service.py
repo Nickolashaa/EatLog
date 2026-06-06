@@ -19,7 +19,7 @@ class UserService:
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
-            raise ObjectNotFound("User not found", id=id)
+            raise ObjectNotFound(message="User not found", id=id)
         return UserResponse.model_validate(instance)
 
     async def get_by_telegram_id(self, telegram_id: int) -> UserResponse:
@@ -27,7 +27,7 @@ class UserService:
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
-            raise ObjectNotFound("User not found", telegram_id=telegram_id)
+            raise ObjectNotFound(message="User not found", telegram_id=telegram_id)
         return UserResponse.model_validate(instance)
 
     async def create(self, **values: Unpack[UserCreateParams]) -> UserResponse:
@@ -42,7 +42,7 @@ class UserService:
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
-            raise ObjectNotFound("User not found", id=id)
+            raise ObjectNotFound(message="User not found", id=id)
         return UserResponse.model_validate(instance)
 
     async def delete(self, id: UUID) -> None:

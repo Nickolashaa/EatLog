@@ -29,7 +29,7 @@ async def get_table(
         filters["date_filter"] = date
     if offset is not None:
         filters["offset"] = offset
-    return await service.get_table_list(user_id, **filters)
+    return await service.get_table_list(user_id=user_id, **filters)
 
 
 @router.get("/totals")
@@ -61,7 +61,7 @@ async def update_meal_log(
 ) -> MealLogResponse:
     try:
         return await service.update(
-            id,
+            id=id,
             meal_id=input.meal_id,
             grams=input.grams,
         )

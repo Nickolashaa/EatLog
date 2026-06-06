@@ -27,3 +27,8 @@ class UserInput(BaseModel):
     height: float
     age: int
     goal: Goal
+
+
+class UserRegister(BaseModel):
+    id: UUID
+    telegram_id: int

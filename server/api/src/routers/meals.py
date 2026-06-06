@@ -60,7 +60,7 @@ async def update_meal(
 ) -> MealResponse:
     try:
         return await service.update(
-            id,
+            id=id,
             title=input.title,
             calories=input.calories,
             protein=input.protein,

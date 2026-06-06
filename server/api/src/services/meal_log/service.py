@@ -25,7 +25,7 @@ class MealLogService:
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
-            raise ObjectNotFound("MealLog not found", id=id)
+            raise ObjectNotFound(message="MealLog not found", id=id)
         return MealLogResponse.model_validate(instance)
 
     async def get_list(
@@ -55,7 +55,7 @@ class MealLogService:
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
-            raise ObjectNotFound("MealLog not found", id=id)
+            raise ObjectNotFound(message="MealLog not found", id=id)
         return MealLogResponse.model_validate(instance)
 
     async def delete(self, id: int) -> None:

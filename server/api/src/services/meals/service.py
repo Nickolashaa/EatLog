@@ -19,7 +19,7 @@ class MealService:
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
-            raise ObjectNotFound("Meal not found", id=id)
+            raise ObjectNotFound(message="Meal not found", id=id)
         return MealResponse.model_validate(instance)
 
     async def get_list(self, **filters: Unpack[MealListFilters]) -> list[MealResponse]:
@@ -46,7 +46,9 @@ class MealService:
             res = await self.session.execute(stmt)
             return MealResponse.model_validate(res.scalar_one())
         except IntegrityError:
-            raise ObjectAlreadyExists("Meal already exists", title=values.get("title"))
+            raise ObjectAlreadyExists(
+                message="Meal already exists", title=values.get("title")
+            )
 
     async def update(self, id: int, **values: Unpack[MealUpdateParams]) -> MealResponse:
         try:
@@ -54,10 +56,12 @@ class MealService:
             res = await self.session.execute(stmt)
             instance = res.scalar_one_or_none()
             if instance is None:
-                raise ObjectNotFound("Meal not found", id=id)
+                raise ObjectNotFound(message="Meal not found", id=id)
             return MealResponse.model_validate(instance)
         except IntegrityError:
-            raise ObjectAlreadyExists("Meal already exists", title=values.get("title"))
+            raise ObjectAlreadyExists(
+                message="Meal already exists", title=values.get("title")
+            )
 
     async def delete(self, id: int) -> None:
         stmt = delete(Meal).where(Meal.id == id)
