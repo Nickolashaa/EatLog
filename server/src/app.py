@@ -15,3 +15,8 @@ app.add_middleware(
 app.include_router(meals.router)
 app.include_router(meal_log.router)
 app.include_router(users.router)
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "ok"}
