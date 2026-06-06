@@ -2,8 +2,6 @@ services:
   api:
     build: ./api/
     env_file: ./api/.env
-    ports:
-      - "8000:8000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5285/health')"]
       interval: 5s
@@ -14,7 +12,8 @@ services:
   nginx:
     build: ./nginx/
     ports:
-      - "5467:80"
+      - "80:80"
+      - "443:443"
     depends_on:
       api:
         condition: service_healthy
