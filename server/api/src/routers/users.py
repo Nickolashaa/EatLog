@@ -49,7 +49,7 @@ async def register_user(
     input: UserRegister, service: UserService = Depends(get_user_service)
 ) -> UserResponse:
     try:
-        return await service.update(id=input.id, telegram_id=input.telegram_id)
+        return await service.register(id=input.id, telegram_id=input.telegram_id)
     except ObjectNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 

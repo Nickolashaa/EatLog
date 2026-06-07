@@ -35,6 +35,15 @@ class UserService:
         res = await self.session.execute(stmt)
         return UserResponse.model_validate(res.scalar_one())
 
+    async def register(self, id: UUID, telegram_id: int) -> UserResponse:
+        stmt = (
+            update(User)
+            .where(User.telegram_id == telegram_id, User.id != id)
+            .values(telegram_id=None)
+        )
+        await self.session.execute(stmt)
+        return await self.update(id=id, telegram_id=telegram_id)
+
     async def update(
         self, id: UUID, **values: Unpack[UserUpdateParams]
     ) -> UserResponse:
