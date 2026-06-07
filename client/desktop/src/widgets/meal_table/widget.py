@@ -3,23 +3,18 @@ from typing import cast
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
-    QAbstractItemView,
-    QHeaderView,
     QLineEdit,
     QMessageBox,
-    QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
-from ..services.meals import MealApiService, MealData, MealInput
-from ..utils.worker import Worker
-from .header import Header
-from .table_utils import btn_cell, readonly
-
-_COLUMNS = ["ID", "Название", "Калории", "Белки", "Жиры", "Углеводы", ""]
-_FIXED_COLS = {0: 50, 2: 90, 3: 90, 4: 90, 5: 90, 6: 210}
+from ...services.meals import MealApiService, MealData, MealInput
+from ...utils.worker import Worker
+from ..header import Header
+from ..table_utils import btn_cell, make_table, readonly
+from .types import COLUMNS, FIXED_COLS
 
 
 class MealTableWidget(QWidget):
@@ -38,25 +33,7 @@ class MealTableWidget(QWidget):
         self.search_input.setPlaceholderText("Поиск...")
         self.search_input.textChanged.connect(lambda text: self._load(text.strip()))
 
-        self.table = QTableWidget(0, len(_COLUMNS), self)
-        self.table.setHorizontalHeaderLabels(_COLUMNS)
-
-        h = self.table.horizontalHeader()
-        assert h is not None
-        h.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        for col in _FIXED_COLS:
-            h.setSectionResizeMode(col, QHeaderView.ResizeMode.Fixed)
-        for col, width in _FIXED_COLS.items():
-            self.table.setColumnWidth(col, width)
-
-        v = self.table.verticalHeader()
-        assert v is not None
-        v.setVisible(False)
-        v.setDefaultSectionSize(40)
-
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.AllEditTriggers)
-        self.table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.table.setShowGrid(False)
+        self.table = make_table(self, COLUMNS, FIXED_COLS)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 14, 14, 14)

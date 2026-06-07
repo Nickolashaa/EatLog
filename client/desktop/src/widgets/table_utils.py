@@ -1,5 +1,13 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QTableWidgetItem, QWidget
+from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QHBoxLayout,
+    QHeaderView,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QWidget,
+)
 
 
 def readonly(text: str) -> QTableWidgetItem:
@@ -26,3 +34,29 @@ def btn_cell(save_cb: object, del_cb: object) -> QWidget:
     del_btn.clicked.connect(del_cb)  # type: ignore[arg-type]
 
     return container
+
+
+def make_table(
+    parent: QWidget,
+    columns: list[str],
+    fixed_cols: dict[int, int],
+) -> QTableWidget:
+    table = QTableWidget(0, len(columns), parent)
+    table.setHorizontalHeaderLabels(columns)
+
+    h = table.horizontalHeader()
+    assert h is not None
+    h.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+    for col, width in fixed_cols.items():
+        h.setSectionResizeMode(col, QHeaderView.ResizeMode.Fixed)
+        table.setColumnWidth(col, width)
+
+    v = table.verticalHeader()
+    assert v is not None
+    v.setVisible(False)
+    v.setDefaultSectionSize(40)
+
+    table.setEditTriggers(QAbstractItemView.EditTrigger.AllEditTriggers)
+    table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+    table.setShowGrid(False)
+    return table

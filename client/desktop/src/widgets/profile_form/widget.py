@@ -11,18 +11,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..services.profile.types import ProfileBase
-
-_GENDER_OPTIONS: list[tuple[str, Literal["male", "female"]]] = [
-    ("Мужской", "male"),
-    ("Женский", "female"),
-]
-
-_GOAL_OPTIONS: list[tuple[str, Literal["maintain", "lose", "gain"]]] = [
-    ("Поддержание веса", "maintain"),
-    ("Похудение", "lose"),
-    ("Набор мышечной массы", "gain"),
-]
+from ...services.profile.types import ProfileBase
+from .types import GENDER_OPTIONS, GOAL_OPTIONS
 
 
 class ProfileForm(QWidget):
@@ -38,7 +28,7 @@ class ProfileForm(QWidget):
 
     def _init_ui(self, button_text: str) -> None:
         self.gender_combo = QComboBox()
-        for label, _ in _GENDER_OPTIONS:
+        for label, _ in GENDER_OPTIONS:
             self.gender_combo.addItem(label)
 
         self.weight_input = QLineEdit()
@@ -54,7 +44,7 @@ class ProfileForm(QWidget):
         self.age_input.setValidator(QIntValidator(10, 120))
 
         self.goal_combo = QComboBox()
-        for label, _ in _GOAL_OPTIONS:
+        for label, _ in GOAL_OPTIONS:
             self.goal_combo.addItem(label)
 
         form = QFormLayout()
@@ -77,7 +67,7 @@ class ProfileForm(QWidget):
 
     def load(self, profile: ProfileBase) -> None:
         gender_idx = next(
-            (i for i, (_, v) in enumerate(_GENDER_OPTIONS) if v == profile["gender"]),
+            (i for i, (_, v) in enumerate(GENDER_OPTIONS) if v == profile["gender"]),
             0,
         )
         self.gender_combo.setCurrentIndex(gender_idx)
@@ -85,7 +75,7 @@ class ProfileForm(QWidget):
         self.height_input.setText(str(profile["height"]))
         self.age_input.setText(str(profile["age"]))
         goal_idx = next(
-            (i for i, (_, v) in enumerate(_GOAL_OPTIONS) if v == profile["goal"]),
+            (i for i, (_, v) in enumerate(GOAL_OPTIONS) if v == profile["goal"]),
             0,
         )
         self.goal_combo.setCurrentIndex(goal_idx)
@@ -105,10 +95,10 @@ class ProfileForm(QWidget):
         except ValueError:
             return None
 
-        gender: Literal["male", "female"] = _GENDER_OPTIONS[
+        gender: Literal["male", "female"] = GENDER_OPTIONS[
             self.gender_combo.currentIndex()
         ][1]
-        goal: Literal["maintain", "lose", "gain"] = _GOAL_OPTIONS[
+        goal: Literal["maintain", "lose", "gain"] = GOAL_OPTIONS[
             self.goal_combo.currentIndex()
         ][1]
 
