@@ -6,11 +6,14 @@ from PyQt6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
     QVBoxLayout,
     QWidget,
 )
 
-from ..services.profile import Kbzhu, Profile, ProfileService
+from ..services.profile import Kbzhu, Profile, ProfileBase, ProfileService
+from ..services.users import UserApiService
+from ..utils.worker import Worker
 from .header import Header
 from .profile_form import ProfileForm
 
@@ -114,9 +117,25 @@ class SettingsWidget(QWidget):
         self._try_load_profile()
 
     def _on_profile_saved(self, profile: object) -> None:
-        p = cast(Profile, profile)
-        ProfileService.save(p)
-        self._update_kbzhu(ProfileService.calculate(p))
+        p = cast(ProfileBase, profile)
+        if not ProfileService.exists():
+            return
+        uuid = ProfileService.load()["uuid"]
+        self.profile_form.save_btn.setEnabled(False)
+        self._worker = Worker(UserApiService.update, uuid=uuid, profile=p)
+        self._worker.finished.connect(lambda _: self._finish_save(p, uuid))
+        self._worker.failed.connect(self._on_save_error)
+        self._worker.start()
+
+    def _finish_save(self, base: ProfileBase, uuid: str) -> None:
+        full: Profile = {**base, "uuid": uuid}
+        ProfileService.save(full)
+        self.profile_form.save_btn.setEnabled(True)
+        self._update_kbzhu(ProfileService.calculate(full))
+
+    def _on_save_error(self, msg: str) -> None:
+        self.profile_form.save_btn.setEnabled(True)
+        QMessageBox.warning(self, "Ошибка", f"Не удалось обновить профиль:\n{msg}")
 
     def _update_kbzhu(self, kbzhu: Kbzhu) -> None:
         data = cast(dict[str, int], kbzhu)

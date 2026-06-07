@@ -1,50 +1,25 @@
+from typing import cast
+
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
     QAbstractItemView,
-    QHBoxLayout,
     QHeaderView,
     QLineEdit,
-    QPushButton,
+    QMessageBox,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
-from ..database.connection import session_maker
-from ..services.meals import MealService
-from ..services.meals.types import MealUpdateParams
+from ..services.meals import MealApiService, MealData, MealInput
+from ..utils.worker import Worker
 from .header import Header
+from .table_utils import btn_cell, readonly
 
 _COLUMNS = ["ID", "Название", "Калории", "Белки", "Жиры", "Углеводы", ""]
 _FIXED_COLS = {0: 50, 2: 90, 3: 90, 4: 90, 5: 90, 6: 210}
-
-
-def _readonly(text: str) -> QTableWidgetItem:
-    item = QTableWidgetItem(text)
-    item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-    return item
-
-
-def _btn_cell(save_cb: object, del_cb: object) -> QWidget:
-    container = QWidget()
-    layout = QHBoxLayout(container)
-    layout.setContentsMargins(4, 4, 4, 4)
-    layout.setSpacing(6)
-
-    save_btn = QPushButton("Сохранить")
-    save_btn.setObjectName("SaveBtn")
-    del_btn = QPushButton("Удалить")
-    del_btn.setObjectName("DeleteBtn")
-
-    layout.addWidget(save_btn)
-    layout.addWidget(del_btn)
-
-    save_btn.clicked.connect(save_cb)  # type: ignore[arg-type]
-    del_btn.clicked.connect(del_cb)  # type: ignore[arg-type]
-
-    return container
 
 
 class MealTableWidget(QWidget):
@@ -97,20 +72,25 @@ class MealTableWidget(QWidget):
         self._load(self.search_input.text().strip())
 
     def _load(self, query: str = "") -> None:
-        with session_maker() as session:
-            meals = MealService.get_list(session, query)
+        self._load_worker = Worker(MealApiService.get_list, search=query)
+        self._load_worker.finished.connect(self._on_loaded)
+        self._load_worker.failed.connect(self._on_error)
+        self._load_worker.start()
+
+    def _on_loaded(self, data: object) -> None:
+        meals = cast(list[MealData], data)
         self.table.setRowCount(len(meals))
         for row, meal in enumerate(meals):
-            self.table.setItem(row, 0, _readonly(str(meal.id)))
-            self.table.setItem(row, 1, QTableWidgetItem(meal.title))
-            self.table.setItem(row, 2, QTableWidgetItem(str(meal.calories)))
-            self.table.setItem(row, 3, QTableWidgetItem(str(meal.protein)))
-            self.table.setItem(row, 4, QTableWidgetItem(str(meal.fat)))
-            self.table.setItem(row, 5, QTableWidgetItem(str(meal.carbohydrate)))
+            self.table.setItem(row, 0, readonly(str(meal["id"])))
+            self.table.setItem(row, 1, QTableWidgetItem(meal["title"]))
+            self.table.setItem(row, 2, QTableWidgetItem(str(meal["calories"])))
+            self.table.setItem(row, 3, QTableWidgetItem(str(meal["protein"])))
+            self.table.setItem(row, 4, QTableWidgetItem(str(meal["fat"])))
+            self.table.setItem(row, 5, QTableWidgetItem(str(meal["carbohydrate"])))
             self.table.setCellWidget(
                 row,
                 6,
-                _btn_cell(
+                btn_cell(
                     lambda checked, r=row: self._on_save(r),
                     lambda checked, r=row: self._on_delete(r),
                 ),
@@ -130,7 +110,7 @@ class MealTableWidget(QWidget):
             return
 
         try:
-            values: MealUpdateParams = {
+            data: MealInput = {
                 "title": title,
                 "calories": float(cell(2).replace(",", ".")),
                 "protein": float(cell(3).replace(",", ".")),
@@ -140,24 +120,26 @@ class MealTableWidget(QWidget):
         except ValueError:
             return
 
-        try:
-            with session_maker() as session:
-                MealService.update(session, int(id_item.text()), values)
-                session.commit()
-        except Exception:
-            return
+        self._save_worker = Worker(
+            MealApiService.update, meal_id=int(id_item.text()), data=data
+        )
+        self._save_worker.failed.connect(self._on_error)
+        self._save_worker.start()
 
     def _on_delete(self, row: int) -> None:
         id_item = self.table.item(row, 0)
         if id_item is None:
             return
 
-        try:
-            with session_maker() as session:
-                MealService.delete(session, int(id_item.text()))
-                session.commit()
-        except Exception:
-            return
+        meal_id = int(id_item.text())
+        self._delete_worker = Worker(MealApiService.delete, meal_id)
+        self._delete_worker.finished.connect(self._on_deleted)
+        self._delete_worker.failed.connect(self._on_error)
+        self._delete_worker.start()
 
+    def _on_deleted(self, _: object) -> None:
         self._load(self.search_input.text().strip())
         self.meal_deleted.emit()
+
+    def _on_error(self, msg: str) -> None:
+        QMessageBox.warning(self, "Ошибка", msg)

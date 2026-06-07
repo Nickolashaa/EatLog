@@ -1,10 +1,13 @@
-from PyQt6.QtCore import QLocale, Qt, pyqtSignal
+from typing import cast
+
+from PyQt6.QtCore import QLocale, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -12,10 +15,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..database.connection import session_maker
-from ..database.models.meals import Meal
-from ..services.meal_log import MealLogService
-from ..services.meals import MealService
+from ..services.meal_log import MealLogApiService
+from ..services.meals import MealApiService, MealData, MealInput
+from ..services.profile import ProfileService
+from ..utils.worker import Worker
 from .header import Header
 
 
@@ -25,7 +28,8 @@ class MealSearch(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self._meals: list[Meal] = []
+        self._meals: list[MealData] = []
+        self._search_seq = 0
         self._init_ui()
 
     def _float_input(self, placeholder: str) -> QLineEdit:
@@ -39,9 +43,14 @@ class MealSearch(QWidget):
     def _init_ui(self) -> None:
         self.header = Header(parent=self, text="Добавить прием пищи")
 
+        self._search_timer = QTimer(self)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(300)
+        self._search_timer.timeout.connect(self._do_search)
+
         self.search_input = QLineEdit(self)
         self.search_input.setPlaceholderText("Поиск блюда...")
-        self.search_input.textChanged.connect(self._on_search)
+        self.search_input.textChanged.connect(lambda _: self._search_timer.start())
 
         self.table = QTableWidget(0, 3, self)
         self.table.setHorizontalHeaderLabels(["Название", "Граммы", ""])
@@ -108,16 +117,26 @@ class MealSearch(QWidget):
 
         self.setObjectName("MealSearch")
 
-    def _on_search(self, text: str) -> None:
-        query = text.strip()
+    def _do_search(self) -> None:
+        query = self.search_input.text().strip()
         if not query:
             self.table.hide()
             self._no_results_section.hide()
             return
 
-        with session_maker() as session:
-            meals = MealService.get_list(session, query, limit=5)
+        self._search_seq += 1
+        seq = self._search_seq
+        self._search_worker = Worker(MealApiService.get_list, search=query, limit=5)
+        self._search_worker.finished.connect(
+            lambda data: self._on_search_result(seq, query, data)
+        )
+        self._search_worker.failed.connect(self._on_error)
+        self._search_worker.start()
 
+    def _on_search_result(self, seq: int, query: str, data: object) -> None:
+        if seq != self._search_seq:
+            return
+        meals = cast(list[MealData], data)
         if meals:
             self._no_results_section.hide()
             self._populate_table(meals)
@@ -126,12 +145,12 @@ class MealSearch(QWidget):
             self._create_title.setText(query)
             self._no_results_section.show()
 
-    def _populate_table(self, meals: list[Meal]) -> None:
+    def _populate_table(self, meals: list[MealData]) -> None:
         self._meals = meals
         self.table.setRowCount(len(meals))
 
         for row, meal in enumerate(meals):
-            title_item = QTableWidgetItem(meal.title)
+            title_item = QTableWidgetItem(meal["title"])
             self.table.setItem(row, 0, title_item)
 
             grams_input = QLineEdit()
@@ -159,12 +178,24 @@ class MealSearch(QWidget):
         grams_text = grams_widget.text().strip().replace(",", ".")
         grams = float(grams_text) if grams_text else 100.0
 
-        with session_maker() as session:
-            MealLogService.create(session, {"meal_id": meal.id, "grams": grams})
-            session.commit()
+        if not ProfileService.exists():
+            return
 
-        grams_widget.clear()
-        self.meal_added.emit()
+        user_id = ProfileService.load()["uuid"]
+
+        def on_added(_: object) -> None:
+            grams_widget.clear()
+            self.meal_added.emit()
+
+        self._add_worker = Worker(
+            MealLogApiService.create,
+            user_id=user_id,
+            meal_id=meal["id"],
+            grams=grams,
+        )
+        self._add_worker.finished.connect(on_added)
+        self._add_worker.failed.connect(self._on_error)
+        self._add_worker.start()
 
     def _on_create(self) -> None:
         title = self._create_title.text().strip()
@@ -174,28 +205,18 @@ class MealSearch(QWidget):
         def parse(field: QLineEdit) -> float:
             return float(field.text().strip().replace(",", ".") or "0")
 
-        try:
-            with session_maker() as session:
-                MealService.create(
-                    session,
-                    {
-                        "title": title,
-                        "calories": parse(self._create_calories),
-                        "protein": parse(self._create_protein),
-                        "fat": parse(self._create_fat),
-                        "carbohydrate": parse(self._create_carbohydrate),
-                    },
-                )
-                session.commit()
-        except Exception:
-            return
+        data: MealInput = {
+            "title": title,
+            "calories": parse(self._create_calories),
+            "protein": parse(self._create_protein),
+            "fat": parse(self._create_fat),
+            "carbohydrate": parse(self._create_carbohydrate),
+        }
 
-        for field in (
-            self._create_calories,
-            self._create_protein,
-            self._create_fat,
-            self._create_carbohydrate,
-        ):
-            field.clear()
+        self._create_worker = Worker(MealApiService.create, **data)
+        self._create_worker.finished.connect(lambda _: self._search_timer.start())
+        self._create_worker.failed.connect(self._on_error)
+        self._create_worker.start()
 
-        self._on_search(self.search_input.text())
+    def _on_error(self, msg: str) -> None:
+        QMessageBox.warning(self, "Ошибка", msg)

@@ -1,12 +1,20 @@
 from datetime import date
+from typing import cast
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ..config import QSS_COLORS
-from ..database.connection import session_maker
-from ..services.meal_log import MealLogService
-from ..services.profile import ProfileService
+from ..services.meal_log import MealLogApiService, MealLogTotals
+from ..services.profile import Profile, ProfileService
+from ..utils.worker import Worker
 from .flask_loader import FlaskLoader
 from .header import Header
 
@@ -85,13 +93,25 @@ class DailyReport(QWidget):
         return flask, value_lbl, container
 
     def refresh(self) -> None:
-        with session_maker() as session:
-            totals = MealLogService.get_daily_totals(session, date.today())
-
         if not ProfileService.exists():
             return
 
-        kbzhu = ProfileService.calculate(ProfileService.load())
+        profile = ProfileService.load()
+        user_id = profile["uuid"]
+
+        self._worker = Worker(
+            MealLogApiService.get_daily_totals,
+            user_id=user_id,
+            target_date=date.today(),
+        )
+        self._worker.finished.connect(
+            lambda totals: self._update_display(cast(MealLogTotals, totals), profile)
+        )
+        self._worker.failed.connect(self._on_error)
+        self._worker.start()
+
+    def _update_display(self, totals: MealLogTotals, profile: Profile) -> None:
+        kbzhu = ProfileService.calculate(profile)
 
         def pct(actual: float, target: int) -> int:
             return min(100, round(actual * 100 / target)) if target > 0 else 0
@@ -134,3 +154,6 @@ class DailyReport(QWidget):
         self.calories_value_lbl.setText(
             fmt(totals["calories"], kbzhu["calories"], "ккал")
         )
+
+    def _on_error(self, msg: str) -> None:
+        QMessageBox.warning(self, "Ошибка загрузки", msg)
