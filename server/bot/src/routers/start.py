@@ -16,20 +16,29 @@ async def start(
     command: CommandObject,
     user_service: UserService,
 ) -> None:
-    if command.args is None:
-        await message.answer(
-            "Привет! Это бот EatLog для привязки аккаунта."
-        )
+    if message.from_user is None:
         return
 
-    arg = command.args.strip()
-    if _is_int(arg):
+    arg = command.args.strip() if command.args else ""
+
+    if not arg:
+        await message.answer("Привет! Это бот EatLog для привязки аккаунта.")
+        return
+
+    if arg == "login":
         try:
-            user = await user_service.get_by_telegram_id(int(arg))
+            user = await user_service.get_by_telegram_id(message.from_user.id)
         except ObjectNotFound:
-            await message.answer("Пользователь не найден.")
+            await message.answer(
+                "К этому Telegram не привязан аккаунт. "
+                "Сначала зарегистрируйтесь в приложении и привяжите Telegram."
+            )
             return
-        await message.answer(f"Ваш UUID: {user.id}")
+        await message.answer(
+            f"Ваш UUID для входа:\n<code>{user.id}</code>\n\n"
+            "Скопируйте его и вставьте в приложении.",
+            parse_mode="HTML",
+        )
         return
 
     try:
@@ -38,16 +47,9 @@ async def start(
         await message.answer("Некорректный параметр.")
         return
 
-    if message.from_user is None:
-        return
-
     try:
         await user_service.register(id=id, telegram_id=message.from_user.id)
     except ObjectNotFound:
         await message.answer("Пользователь не найден.")
         return
     await message.answer("Вы успешно зарегистрированы!")
-
-
-def _is_int(value: str) -> bool:
-    return value.lstrip("-").isdigit()
