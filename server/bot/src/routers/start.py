@@ -25,9 +25,12 @@ async def start(
         await message.answer("Привет! Это бот EatLog для привязки аккаунта.")
         return
 
-    if arg == "login":
+    mode, _, payload = arg.partition("_")
+    telegram_id = message.from_user.id
+
+    if mode == "login":
         try:
-            user = await user_service.get_by_telegram_id(message.from_user.id)
+            user = await user_service.get_by_telegram_id(telegram_id)
         except ObjectNotFound:
             await message.answer(
                 "К этому Telegram не привязан аккаунт. "
@@ -41,15 +44,18 @@ async def start(
         )
         return
 
-    try:
-        id = UUID(arg)
-    except ValueError:
-        await message.answer("Некорректный параметр.")
+    if mode == "reg":
+        try:
+            id = UUID(payload)
+        except ValueError:
+            await message.answer("Некорректный параметр.")
+            return
+        try:
+            await user_service.register(id=id, telegram_id=telegram_id)
+        except ObjectNotFound:
+            await message.answer("Пользователь не найден.")
+            return
+        await message.answer("Вы успешно зарегистрированы!")
         return
 
-    try:
-        await user_service.register(id=id, telegram_id=message.from_user.id)
-    except ObjectNotFound:
-        await message.answer("Пользователь не найден.")
-        return
-    await message.answer("Вы успешно зарегистрированы!")
+    await message.answer("Некорректный параметр.")
