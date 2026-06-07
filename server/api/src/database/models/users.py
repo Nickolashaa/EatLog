@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import func, text
+from sqlalchemy import BigInteger, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..connection import Base
@@ -25,7 +25,7 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True, server_default=text("gen_random_uuid()")
     )
-    telegram_id: Mapped[int | None]
+    telegram_id: Mapped[int | None] = mapped_column(BigInteger)
     gender: Mapped[Gender]
     weight: Mapped[float]
     height: Mapped[float]
