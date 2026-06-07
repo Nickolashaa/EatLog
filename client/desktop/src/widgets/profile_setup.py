@@ -92,9 +92,7 @@ class ProfileSetupDialog(QDialog):
     def _build_login_page(self) -> QWidget:
         page = QWidget()
 
-        subtitle = QLabel(
-            "Введите свой UUID, чтобы войти в существующий аккаунт."
-        )
+        subtitle = QLabel("Введите свой UUID, чтобы войти в существующий аккаунт.")
         subtitle.setObjectName("WelcomeLabel")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 

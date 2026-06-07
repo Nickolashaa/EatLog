@@ -160,7 +160,7 @@ class SettingsWidget(QWidget):
             )
             return
         uuid = ProfileService.load()["uuid"]
-        url = QUrl(f"https://t.me/{BOT_USERNAME}?start={uuid}")
+        url = QUrl(f"https://t.me/{BOT_USERNAME}?start=reg_{uuid}")
         QDesktopServices.openUrl(url)
 
     def _update_kbzhu(self, kbzhu: Kbzhu) -> None:
