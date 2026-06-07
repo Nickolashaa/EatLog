@@ -1,4 +1,4 @@
 from .service import ProfileService
-from .types import Kbzhu, Profile
+from .types import Kbzhu, Profile, ProfileBase
 
-__all__ = ("Kbzhu", "Profile", "ProfileService")
+__all__ = ("Kbzhu", "Profile", "ProfileBase", "ProfileService")

@@ -1,30 +1,39 @@
-import json
-from pathlib import Path
-from typing import cast
+from typing import Literal, cast
 
-from .types import Kbzhu, Profile
+from PyQt6.QtCore import QSettings
 
-PROFILE_PATH = Path("src/database/profile.json")
+from .types import Kbzhu, Profile, ProfileBase
 
 
 class ProfileService:
     @staticmethod
     def exists() -> bool:
-        return PROFILE_PATH.exists()
+        return bool(QSettings("EatLog", "EatLog").value("profile/uuid"))
 
     @staticmethod
     def load() -> Profile:
-        with PROFILE_PATH.open(encoding="utf-8") as f:
-            return cast(Profile, json.load(f))
+        s = QSettings("EatLog", "EatLog")
+        return {
+            "uuid": str(s.value("profile/uuid")),
+            "gender": cast(Literal["male", "female"], s.value("profile/gender")),
+            "weight": float(s.value("profile/weight")),
+            "height": float(s.value("profile/height")),
+            "age": int(s.value("profile/age")),
+            "goal": cast(Literal["maintain", "lose", "gain"], s.value("profile/goal")),
+        }
 
     @staticmethod
     def save(profile: Profile) -> None:
-        PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with PROFILE_PATH.open("w", encoding="utf-8") as f:
-            json.dump(profile, f, indent=2, ensure_ascii=False)
+        s = QSettings("EatLog", "EatLog")
+        s.setValue("profile/uuid", profile["uuid"])
+        s.setValue("profile/gender", profile["gender"])
+        s.setValue("profile/weight", profile["weight"])
+        s.setValue("profile/height", profile["height"])
+        s.setValue("profile/age", profile["age"])
+        s.setValue("profile/goal", profile["goal"])
 
     @staticmethod
-    def calculate(profile: Profile) -> Kbzhu:
+    def calculate(profile: ProfileBase) -> Kbzhu:
         w, h, a = profile["weight"], profile["height"], profile["age"]
 
         if profile["gender"] == "male":
@@ -32,7 +41,6 @@ class ProfileService:
         else:
             bmr = 10.0 * w + 6.25 * h - 5.0 * a - 161
 
-        # Moderate activity (3-5 days/week)
         tdee = bmr * 1.55
 
         goal = profile["goal"]
