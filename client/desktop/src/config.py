@@ -1,6 +1,4 @@
-import os
-
-API_URL = os.getenv("EATLOG_API_URL", "http://localhost:8000")
+API_URL = "http://api.eat-log.ru"
 
 WIDTH = 1280
 HEIGHT = 720
