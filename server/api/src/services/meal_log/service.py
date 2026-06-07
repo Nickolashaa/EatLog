@@ -68,6 +68,7 @@ class MealLogService:
         stmt = (
             select(
                 MealLog.id,
+                MealLog.meal_id,
                 Meal.title,
                 MealLog.grams,
                 (Meal.calories * MealLog.grams / 100).label("calories"),
@@ -87,12 +88,13 @@ class MealLogService:
         return [
             MealLogTableRowResponse(
                 log_id=int(r[0]),
-                meal_title=str(r[1]),
-                grams=float(r[2]),
-                calories=round(float(r[3]), 1),
-                protein=round(float(r[4]), 1),
-                fat=round(float(r[5]), 1),
-                carbohydrate=round(float(r[6]), 1),
+                meal_id=int(r[1]),
+                meal_title=str(r[2]),
+                grams=float(r[3]),
+                calories=round(float(r[4]), 1),
+                protein=round(float(r[5]), 1),
+                fat=round(float(r[6]), 1),
+                carbohydrate=round(float(r[7]), 1),
             )
             for r in res.all()
         ]

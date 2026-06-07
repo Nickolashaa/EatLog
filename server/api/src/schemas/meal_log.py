@@ -23,6 +23,7 @@ class MealLogInput(BaseModel):
 
 class MealLogTableRowResponse(BaseModel):
     log_id: int
+    meal_id: int
     meal_title: str
     grams: float
     calories: float
