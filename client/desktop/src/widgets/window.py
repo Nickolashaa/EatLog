@@ -1,13 +1,10 @@
-from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QTabWidget, QWidget
 
 from ..config import HEIGHT, TITLE, WIDTH
-from ..services.profile import ProfileService
 from .daily_report import DailyReport
 from .meal_log_table import MealLogTableWidget
 from .meal_search import MealSearch
 from .meal_table import MealTableWidget
-from .profile_setup import ProfileSetupDialog
 from .settings import SettingsWidget
 
 
@@ -43,9 +40,3 @@ class EatLogWindow(QMainWindow):
         self.tabs.addTab(SettingsWidget(), "Настройки")
 
         self.setCentralWidget(self.tabs)
-
-        if not ProfileService.exists():
-            QTimer.singleShot(0, self._show_profile_setup)
-
-    def _show_profile_setup(self) -> None:
-        ProfileSetupDialog(parent=self).exec()

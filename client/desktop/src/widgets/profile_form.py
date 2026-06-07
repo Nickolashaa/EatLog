@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..services.profile.types import Profile
+from ..services.profile.types import ProfileBase
 
 _GENDER_OPTIONS: list[tuple[str, Literal["male", "female"]]] = [
     ("Мужской", "male"),
@@ -75,7 +75,7 @@ class ProfileForm(QWidget):
         layout.addLayout(form)
         layout.addWidget(self.save_btn)
 
-    def load(self, profile: Profile) -> None:
+    def load(self, profile: ProfileBase) -> None:
         gender_idx = next(
             (i for i, (_, v) in enumerate(_GENDER_OPTIONS) if v == profile["gender"]),
             0,
@@ -90,7 +90,7 @@ class ProfileForm(QWidget):
         )
         self.goal_combo.setCurrentIndex(goal_idx)
 
-    def get_values(self) -> Profile | None:
+    def get_values(self) -> ProfileBase | None:
         weight_text = self.weight_input.text().strip().replace(",", ".")
         height_text = self.height_input.text().strip().replace(",", ".")
         age_text = self.age_input.text().strip()
