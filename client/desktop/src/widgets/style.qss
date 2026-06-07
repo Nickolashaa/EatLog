@@ -157,6 +157,54 @@ QLabel {
     border-radius: 0;
 }
 
+QPushButton#SwitchBtn {
+    background-color: #181825;
+    color: #a6adc8;
+    border: 1px solid #45475a;
+    border-radius: 0;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+QPushButton#SwitchBtn:hover {
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+QPushButton#SwitchBtn:checked {
+    background-color: #313244;
+    color: #cdd6f4;
+    border-bottom: 2px solid #cba6f7;
+}
+
+#TelegramHint {
+    color: #a6adc8;
+    font-size: 14px;
+    line-height: 20px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+QPushButton#TelegramBtn {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+    border: none;
+    border-radius: 7px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+QPushButton#TelegramBtn:hover {
+    background-color: #74c7ec;
+}
+
+QPushButton#TelegramBtn:pressed {
+    background-color: #89b4fa;
+}
+
 QLineEdit {
     background-color: #313244;
     color: #cdd6f4;

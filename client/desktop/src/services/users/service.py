@@ -1,7 +1,7 @@
-from typing import Unpack
+from typing import Literal, Unpack, cast
 
 from ..api.client import client
-from ..profile.types import ProfileBase
+from ..profile.types import Profile, ProfileBase
 from .types import UserUpdateParams
 
 
@@ -11,6 +11,20 @@ class UserApiService:
         resp = client.post("/users", json={"telegram_id": None, **profile})
         resp.raise_for_status()
         return str(resp.json()["id"])
+
+    @staticmethod
+    def get(uuid: str) -> Profile:
+        resp = client.get(f"/users/{uuid}")
+        resp.raise_for_status()
+        data = resp.json()
+        return {
+            "uuid": str(data["id"]),
+            "gender": cast(Literal["male", "female"], data["gender"]),
+            "weight": float(data["weight"]),
+            "height": float(data["height"]),
+            "age": int(data["age"]),
+            "goal": cast(Literal["maintain", "lose", "gain"], data["goal"]),
+        }
 
     @staticmethod
     def update(**params: Unpack[UserUpdateParams]) -> None:

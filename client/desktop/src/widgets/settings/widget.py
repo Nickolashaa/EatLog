@@ -1,28 +1,24 @@
 from typing import cast
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QShowEvent
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import QDesktopServices, QShowEvent
 from PyQt6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QMessageBox,
+    QPushButton,
     QVBoxLayout,
     QWidget,
 )
 
-from ..services.profile import Kbzhu, Profile, ProfileBase, ProfileService
-from ..services.users import UserApiService
-from ..utils.worker import Worker
-from .header import Header
-from .profile_form import ProfileForm
-
-_KBZHU_ROWS: list[tuple[str, str, str]] = [
-    ("calories", "Калории", "ккал"),
-    ("protein", "Белки", "г"),
-    ("fat", "Жиры", "г"),
-    ("carbohydrate", "Углеводы", "г"),
-]
+from ...config import BOT_USERNAME
+from ...services.profile import Kbzhu, Profile, ProfileBase, ProfileService
+from ...services.users import UserApiService
+from ...utils.worker import Worker
+from ..header import Header
+from ..profile_form import ProfileForm
+from .types import KBZHU_ROWS
 
 
 class SettingsWidget(QWidget):
@@ -64,7 +60,7 @@ class SettingsWidget(QWidget):
         grid.setSpacing(16)
         grid.setContentsMargins(0, 0, 0, 0)
 
-        for row_idx, (key, label_text, unit) in enumerate(_KBZHU_ROWS):
+        for row_idx, (key, label_text, unit) in enumerate(KBZHU_ROWS):
             name_lbl = QLabel(label_text)
             name_lbl.setObjectName("KbzhuName")
 
@@ -84,11 +80,29 @@ class SettingsWidget(QWidget):
 
         grid.setColumnStretch(1, 1)
 
+        telegram_title = QLabel("Telegram")
+        telegram_title.setObjectName("SectionTitle")
+
+        telegram_hint = QLabel(
+            "Привяжите Telegram, чтобы не потерять свои данные при "
+            "переустановке и получить доступ к дополнительным функциям бота."
+        )
+        telegram_hint.setObjectName("TelegramHint")
+        telegram_hint.setWordWrap(True)
+
+        self.telegram_btn = QPushButton("Привязать Telegram")
+        self.telegram_btn.setObjectName("TelegramBtn")
+        self.telegram_btn.clicked.connect(self._on_link_telegram)
+
         right_layout = QVBoxLayout(right_panel)
         right_layout.setContentsMargins(28, 28, 28, 28)
         right_layout.setSpacing(24)
         right_layout.addWidget(kbzhu_title)
         right_layout.addLayout(grid)
+        right_layout.addSpacing(8)
+        right_layout.addWidget(telegram_title)
+        right_layout.addWidget(telegram_hint)
+        right_layout.addWidget(self.telegram_btn)
         right_layout.addStretch()
 
         content = QWidget()
@@ -136,6 +150,18 @@ class SettingsWidget(QWidget):
     def _on_save_error(self, msg: str) -> None:
         self.profile_form.save_btn.setEnabled(True)
         QMessageBox.warning(self, "Ошибка", f"Не удалось обновить профиль:\n{msg}")
+
+    def _on_link_telegram(self) -> None:
+        if not ProfileService.exists():
+            QMessageBox.warning(
+                self,
+                "Профиль не найден",
+                "Сначала заполните профиль, чтобы привязать Telegram.",
+            )
+            return
+        uuid = ProfileService.load()["uuid"]
+        url = QUrl(f"https://t.me/{BOT_USERNAME}?start={uuid}")
+        QDesktopServices.openUrl(url)
 
     def _update_kbzhu(self, kbzhu: Kbzhu) -> None:
         data = cast(dict[str, int], kbzhu)

@@ -1,4 +1,5 @@
 API_URL = "http://api.eat-log.ru"
+BOT_USERNAME = "eat_log_bot"
 
 WIDTH = 1280
 HEIGHT = 720
