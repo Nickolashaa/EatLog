@@ -33,6 +33,14 @@ class ProfileService:
         s.setValue("profile/goal", profile["goal"])
 
     @staticmethod
+    def telegram_linked() -> bool:
+        return QSettings("EatLog", "EatLog").value("profile/telegram_id") is not None
+
+    @staticmethod
+    def set_telegram_id(telegram_id: int) -> None:
+        QSettings("EatLog", "EatLog").setValue("profile/telegram_id", telegram_id)
+
+    @staticmethod
     def calculate(profile: ProfileBase) -> Kbzhu:
         w, h, a = profile["weight"], profile["height"], profile["age"]
 

@@ -1,7 +1,7 @@
 from typing import cast
 
-from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtGui import QDesktopServices, QShowEvent
+from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtGui import QDesktopServices, QHideEvent, QShowEvent
 from PyQt6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
@@ -18,6 +18,7 @@ from ...services.users import UserApiService
 from ...utils.worker import Worker
 from ..header import Header
 from ..profile_form import ProfileForm
+from ..spinner import Spinner
 from .types import KBZHU_ROWS
 
 
@@ -28,6 +29,10 @@ class SettingsWidget(QWidget):
         self._val_labels: dict[str, QLabel] = {}
         self._init_ui()
         self._try_load_profile()
+        self._telegram_timer = QTimer(self)
+        self._telegram_timer.setInterval(3000)
+        self._telegram_timer.timeout.connect(self._sync_telegram)
+        self._refresh_telegram_ui()
 
     def _init_ui(self) -> None:
         self.header = Header(parent=self, text="Настройки")
@@ -80,19 +85,22 @@ class SettingsWidget(QWidget):
 
         grid.setColumnStretch(1, 1)
 
-        telegram_title = QLabel("Telegram")
-        telegram_title.setObjectName("SectionTitle")
+        self.telegram_title = QLabel("Telegram")
+        self.telegram_title.setObjectName("SectionTitle")
 
-        telegram_hint = QLabel(
+        self.telegram_hint = QLabel(
             "Привяжите Telegram, чтобы не потерять свои данные при "
             "переустановке и получить доступ к дополнительным функциям бота."
         )
-        telegram_hint.setObjectName("TelegramHint")
-        telegram_hint.setWordWrap(True)
+        self.telegram_hint.setObjectName("TelegramHint")
+        self.telegram_hint.setWordWrap(True)
 
         self.telegram_btn = QPushButton("Привязать Telegram")
         self.telegram_btn.setObjectName("TelegramBtn")
         self.telegram_btn.clicked.connect(self._on_link_telegram)
+
+        self.telegram_spinner = Spinner(parent=self)
+        self.telegram_spinner.hide()
 
         right_layout = QVBoxLayout(right_panel)
         right_layout.setContentsMargins(28, 28, 28, 28)
@@ -100,9 +108,12 @@ class SettingsWidget(QWidget):
         right_layout.addWidget(kbzhu_title)
         right_layout.addLayout(grid)
         right_layout.addSpacing(8)
-        right_layout.addWidget(telegram_title)
-        right_layout.addWidget(telegram_hint)
+        right_layout.addWidget(self.telegram_title)
+        right_layout.addWidget(self.telegram_hint)
         right_layout.addWidget(self.telegram_btn)
+        right_layout.addWidget(
+            self.telegram_spinner, alignment=Qt.AlignmentFlag.AlignLeft
+        )
         right_layout.addStretch()
 
         content = QWidget()
@@ -129,6 +140,13 @@ class SettingsWidget(QWidget):
     def showEvent(self, event: QShowEvent | None) -> None:
         super().showEvent(event)
         self._try_load_profile()
+        self._refresh_telegram_ui()
+        self._sync_telegram()
+
+    def hideEvent(self, event: QHideEvent | None) -> None:
+        super().hideEvent(event)
+        self._telegram_timer.stop()
+        self.telegram_spinner.stop()
 
     def _on_profile_saved(self, profile: object) -> None:
         p = cast(ProfileBase, profile)
@@ -162,6 +180,39 @@ class SettingsWidget(QWidget):
         uuid = ProfileService.load()["uuid"]
         url = QUrl(f"https://t.me/{BOT_USERNAME}?start=reg_{uuid}")
         QDesktopServices.openUrl(url)
+        if not self._telegram_timer.isActive():
+            self._telegram_timer.start()
+        self._refresh_telegram_ui()
+        self._sync_telegram()
+
+    def _refresh_telegram_ui(self) -> None:
+        linked = ProfileService.telegram_linked()
+        polling = self._telegram_timer.isActive()
+        self.telegram_title.setVisible(not linked)
+        self.telegram_hint.setVisible(not linked)
+        self.telegram_btn.setVisible(not linked and not polling)
+        self.telegram_spinner.setVisible(not linked and polling)
+        if not linked and polling:
+            self.telegram_spinner.start()
+        else:
+            self.telegram_spinner.stop()
+        if linked:
+            self._telegram_timer.stop()
+
+    def _sync_telegram(self) -> None:
+        if ProfileService.telegram_linked() or not ProfileService.exists():
+            self._telegram_timer.stop()
+            return
+        uuid = ProfileService.load()["uuid"]
+        self._telegram_worker = Worker(UserApiService.get_telegram_id, uuid)
+        self._telegram_worker.finished.connect(self._on_telegram_checked)
+        self._telegram_worker.start()
+
+    def _on_telegram_checked(self, telegram_id: object) -> None:
+        if telegram_id is None:
+            return
+        ProfileService.set_telegram_id(cast(int, telegram_id))
+        self._refresh_telegram_ui()
 
     def _update_kbzhu(self, kbzhu: Kbzhu) -> None:
         data = cast(dict[str, int], kbzhu)

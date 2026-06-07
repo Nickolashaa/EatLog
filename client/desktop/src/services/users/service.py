@@ -27,6 +27,13 @@ class UserApiService:
         }
 
     @staticmethod
+    def get_telegram_id(uuid: str) -> int | None:
+        resp = client.get(f"/users/{uuid}")
+        resp.raise_for_status()
+        telegram_id = resp.json()["telegram_id"]
+        return int(telegram_id) if telegram_id is not None else None
+
+    @staticmethod
     def update(**params: Unpack[UserUpdateParams]) -> None:
         resp = client.put(
             f"/users/{params['uuid']}",
