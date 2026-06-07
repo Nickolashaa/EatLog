@@ -17,8 +17,10 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
       - name: Setup dependencies
+        working-directory: server/api
         run: uv sync
       - name: Launch linters
+        working-directory: server/api
         run: |
           uv run ruff format --check .
           uv run ruff check .
