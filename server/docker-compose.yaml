@@ -2,11 +2,11 @@ services:
   api:
     build: ./api/
     environment:
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5285/health')"]
       interval: 5s
@@ -17,7 +17,7 @@ services:
   bot:
     build: ./bot/
     environment:
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
       api:
         condition: service_healthy
