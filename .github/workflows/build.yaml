@@ -21,8 +21,3 @@ jobs:
         with:
           compose-file: ./server/docker-compose.yaml
           up-flags: "-d --build --wait"
-      - name: Debug nginx on failure
-          if: failure()
-          run: |
-            docker inspect --format '{{json .State.Health}}' server-nginx-1
-            docker logs server-nginx-1
