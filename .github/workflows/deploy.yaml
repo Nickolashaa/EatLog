@@ -39,10 +39,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            mkdir -p ~/eatlog
-            cd ~/eatlog
-            docker compose down || true
+          script: docker compose down || true
       - name: Copy docker-compose to server
         uses: appleboy/scp-action@v1
         with:
@@ -50,7 +47,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           source: "./server/docker-compose.yaml"
-          target: "~/eatlog/"
+          target: "~/"
           strip_components: 1
       - name: Create .env on server
         uses: appleboy/ssh-action@v1
@@ -67,7 +64,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           envs: DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,BOT_TOKEN
           script: |
-            cat > ~/eatlog/.env <<EOF
+            cat > ~/.env <<EOF
             DB_HOST=${DB_HOST}
             DB_PORT=${DB_PORT}
             DB_NAME=${DB_NAME}
@@ -82,7 +79,6 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cd ~/eatlog
             docker compose pull
             docker compose up -d
             docker image prune -f
