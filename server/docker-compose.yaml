@@ -1,6 +1,6 @@
 services:
   api:
-    build: ./api/
+    image: grachevnr/eat_log_api:latest
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -15,7 +15,7 @@ services:
       start_period: 5s
 
   bot:
-    build: ./bot/
+    image: grachevnr/eat_log_bot:latest
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
@@ -29,7 +29,7 @@ services:
       start_period: 5s
 
   nginx:
-    build: ./nginx/
+    image: grachevnr/eat_log_nginx:latest
     ports:
       - "80:80"
       - "443:443"
