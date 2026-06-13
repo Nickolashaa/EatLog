@@ -1,5 +1,0 @@
-docker-compose.dev.yaml
-__pycache__/
-.venv/
-.ruff_cache/
-.mypy_cache/
