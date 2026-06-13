@@ -1,7 +1,12 @@
 services:
   api:
-    build: ./api/
-    env_file: ./api/.env
+    image: grachevnr/eat_log_api:latest
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5285/health')"]
       interval: 5s
@@ -10,17 +15,30 @@ services:
       start_period: 5s
 
   bot:
-    build: ./bot/
-    env_file: ./bot/.env
+    image: grachevnr/eat_log_bot:latest
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://api:5285/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   nginx:
-    build: ./nginx/
+    image: grachevnr/eat_log_nginx:latest
     ports:
       - "80:80"
       - "443:443"
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
