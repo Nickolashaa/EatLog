@@ -6,18 +6,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+    strategy:
+      matrix:
+        service: [api, bot, nginx]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Build containers
-        uses: hoverkraft-tech/compose-action@11beaa1c2dae4e8ed7b1665aa074723b6cecb0e4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v6
         with:
-          compose-file: ./server/docker-compose.yaml
-          up-flags: "-d --build --wait"
+          context: ./server/${{ matrix.service }}
+          push: false
