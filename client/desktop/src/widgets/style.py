@@ -1,63 +1,69 @@
+from string import Template
+
+from ..config import QSS_COLORS
+
+_TEMPLATE = Template(
+    """
 QMainWindow {
-    background-color: #1e1e2e;
+    background-color: $bg;
 }
 
 QTabWidget::pane {
-    background-color: #1e1e2e;
-    border: 1px solid #45475a;
+    background-color: $bg;
+    border: 1px solid $border;
 }
 
 QTabBar::tab {
-    background-color: #181825;
-    color: #a6adc8;
+    background-color: $bg_secondary;
+    color: $text_muted;
     padding: 8px 18px;
     border: none;
 }
 
 QTabBar::tab:selected {
-    background-color: #313244;
-    color: #cdd6f4;
-    border-bottom: 2px solid #cba6f7;
+    background-color: $bg_elevated;
+    color: $text;
+    border-bottom: 2px solid $primary;
 }
 
 QTabBar::tab:hover:!selected {
-    background-color: #313244;
-    color: #cdd6f4;
+    background-color: $bg_elevated;
+    color: $text;
 }
 
 QDialog {
-    background-color: #1e1e2e;
+    background-color: $bg;
 }
 
 #MealSearch {
-    background-color: #181825;
-    border-right: 1px solid #45475a;
+    background-color: $bg_secondary;
+    border-right: 1px solid $border;
 }
 
 #MealTable {
-    background-color: #181825;
+    background-color: $bg_secondary;
 }
 
 #MealLogTable {
-    background-color: #181825;
+    background-color: $bg_secondary;
 }
 
 #DailyReport {
-    background-color: #181825;
-    border-left: 1px solid #45475a;
+    background-color: $bg_secondary;
+    border-left: 1px solid $border;
 }
 
 #SettingsWidget {
-    background-color: #181825;
+    background-color: $bg_secondary;
 }
 
 #SettingsPanel {
-    background-color: #1e1e2e;
+    background-color: $bg;
 }
 
 #Header {
-    color: #cdd6f4;
-    background-color: #313244;
+    color: $text;
+    background-color: $bg_elevated;
     font-size: 18px;
     font-weight: bold;
     padding: 12px 18px;
@@ -65,7 +71,7 @@ QDialog {
 }
 
 QLabel {
-    color: #a6adc8;
+    color: $text_muted;
     font-size: 14px;
     background: transparent;
     padding: 0;
@@ -73,7 +79,7 @@ QLabel {
 }
 
 #SectionTitle {
-    color: #cdd6f4;
+    color: $text;
     font-size: 18px;
     font-weight: bold;
     background: transparent;
@@ -82,7 +88,7 @@ QLabel {
 }
 
 #KbzhuName {
-    color: #a6adc8;
+    color: $text_muted;
     font-size: 20px;
     background: transparent;
     padding: 0;
@@ -90,7 +96,7 @@ QLabel {
 }
 
 #KbzhuValue {
-    color: #cba6f7;
+    color: $primary;
     font-size: 48px;
     font-weight: bold;
     background: transparent;
@@ -99,7 +105,7 @@ QLabel {
 }
 
 #KbzhuUnit {
-    color: #6c7086;
+    color: $text_disabled;
     font-size: 18px;
     background: transparent;
     padding: 0;
@@ -107,7 +113,7 @@ QLabel {
 }
 
 #FlaskName {
-    color: #cdd6f4;
+    color: $text;
     font-size: 13px;
     font-weight: bold;
     background: transparent;
@@ -116,7 +122,7 @@ QLabel {
 }
 
 #FlaskValue {
-    color: #a6adc8;
+    color: $text_muted;
     font-size: 12px;
     background: transparent;
     padding: 0;
@@ -124,7 +130,7 @@ QLabel {
 }
 
 #NotFoundLabel {
-    color: #a6adc8;
+    color: $text_muted;
     font-size: 16px;
     font-weight: bold;
     background: transparent;
@@ -133,7 +139,7 @@ QLabel {
 }
 
 #FormSubtitle {
-    color: #6c7086;
+    color: $text_disabled;
     font-size: 13px;
     background: transparent;
     padding: 0;
@@ -141,7 +147,7 @@ QLabel {
 }
 
 #WelcomeTitle {
-    color: #cba6f7;
+    color: $primary;
     font-size: 22px;
     font-weight: bold;
     background: transparent;
@@ -150,7 +156,7 @@ QLabel {
 }
 
 #WelcomeLabel {
-    color: #a6adc8;
+    color: $text_muted;
     font-size: 13px;
     background: transparent;
     padding: 0;
@@ -158,9 +164,9 @@ QLabel {
 }
 
 QPushButton#SwitchBtn {
-    background-color: #181825;
-    color: #a6adc8;
-    border: 1px solid #45475a;
+    background-color: $bg_secondary;
+    color: $text_muted;
+    border: 1px solid $border;
     border-radius: 0;
     padding: 10px 14px;
     font-size: 14px;
@@ -168,18 +174,18 @@ QPushButton#SwitchBtn {
 }
 
 QPushButton#SwitchBtn:hover {
-    background-color: #313244;
-    color: #cdd6f4;
+    background-color: $bg_elevated;
+    color: $text;
 }
 
 QPushButton#SwitchBtn:checked {
-    background-color: #313244;
-    color: #cdd6f4;
-    border-bottom: 2px solid #cba6f7;
+    background-color: $bg_elevated;
+    color: $text;
+    border-bottom: 2px solid $primary;
 }
 
 #TelegramHint {
-    color: #a6adc8;
+    color: $text_muted;
     font-size: 14px;
     line-height: 20px;
     background: transparent;
@@ -188,8 +194,8 @@ QPushButton#SwitchBtn:checked {
 }
 
 QPushButton#TelegramBtn {
-    background-color: #89b4fa;
-    color: #1e1e2e;
+    background-color: $secondary;
+    color: $bg;
     border: none;
     border-radius: 7px;
     padding: 11px 14px;
@@ -198,37 +204,37 @@ QPushButton#TelegramBtn {
 }
 
 QPushButton#TelegramBtn:hover {
-    background-color: #74c7ec;
+    background-color: $secondary_hover;
 }
 
 QPushButton#TelegramBtn:pressed {
-    background-color: #89b4fa;
+    background-color: $secondary;
 }
 
 QLineEdit {
-    background-color: #313244;
-    color: #cdd6f4;
-    border: 1px solid #45475a;
+    background-color: $bg_elevated;
+    color: $text;
+    border: 1px solid $border;
     border-radius: 8px;
     padding: 10px 14px;
     font-size: 15px;
 }
 
 QLineEdit:focus {
-    border-color: #cba6f7;
+    border-color: $border_focus;
 }
 
 QComboBox {
-    background-color: #313244;
-    color: #cdd6f4;
-    border: 1px solid #45475a;
+    background-color: $bg_elevated;
+    color: $text;
+    border: 1px solid $border;
     border-radius: 8px;
     padding: 10px 14px;
     font-size: 15px;
 }
 
 QComboBox:focus {
-    border-color: #cba6f7;
+    border-color: $border_focus;
 }
 
 QComboBox::drop-down {
@@ -237,26 +243,26 @@ QComboBox::drop-down {
 }
 
 QComboBox QAbstractItemView {
-    background-color: #313244;
-    color: #cdd6f4;
-    border: 1px solid #45475a;
-    selection-background-color: #cba6f7;
-    selection-color: #1e1e2e;
+    background-color: $bg_elevated;
+    color: $text;
+    border: 1px solid $border;
+    selection-background-color: $primary;
+    selection-color: $bg;
     outline: 0;
     font-size: 15px;
 }
 
 QDateEdit {
-    background-color: #313244;
-    color: #cdd6f4;
-    border: 1px solid #45475a;
+    background-color: $bg_elevated;
+    color: $text;
+    border: 1px solid $border;
     border-radius: 6px;
     padding: 7px 11px;
     font-size: 13px;
 }
 
 QDateEdit:focus {
-    border-color: #cba6f7;
+    border-color: $border_focus;
 }
 
 QDateEdit::drop-down {
@@ -265,13 +271,13 @@ QDateEdit::drop-down {
 }
 
 QCalendarWidget {
-    background-color: #313244;
-    color: #cdd6f4;
+    background-color: $bg_elevated;
+    color: $text;
 }
 
 QPushButton {
-    background-color: #cba6f7;
-    color: #1e1e2e;
+    background-color: $primary;
+    color: $bg;
     border: none;
     border-radius: 7px;
     padding: 9px 14px;
@@ -280,17 +286,17 @@ QPushButton {
 }
 
 QPushButton:hover {
-    background-color: #89b4fa;
+    background-color: $secondary;
 }
 
 QPushButton:pressed {
-    background-color: #cba6f7;
+    background-color: $primary;
 }
 
 QPushButton#RefreshBtn {
-    background-color: #313244;
-    color: #cdd6f4;
-    border: 1px solid #45475a;
+    background-color: $bg_elevated;
+    color: $text;
+    border: 1px solid $border;
     border-radius: 7px;
     padding: 8px 14px;
     font-size: 13px;
@@ -298,16 +304,16 @@ QPushButton#RefreshBtn {
 }
 
 QPushButton#RefreshBtn:hover {
-    background-color: #45475a;
+    background-color: $border;
 }
 
 QPushButton#RefreshBtn:pressed {
-    background-color: #313244;
+    background-color: $bg_elevated;
 }
 
 QPushButton#SaveBtn {
-    background-color: #cba6f7;
-    color: #1e1e2e;
+    background-color: $primary;
+    color: $bg;
     border: none;
     border-radius: 5px;
     padding: 5px 10px;
@@ -316,16 +322,16 @@ QPushButton#SaveBtn {
 }
 
 QPushButton#SaveBtn:hover {
-    background-color: #89b4fa;
+    background-color: $secondary;
 }
 
 QPushButton#SaveBtn:pressed {
-    background-color: #cba6f7;
+    background-color: $primary;
 }
 
 QPushButton#DeleteBtn {
-    background-color: #f38ba8;
-    color: #1e1e2e;
+    background-color: $error;
+    color: $bg;
     border: none;
     border-radius: 5px;
     padding: 5px 10px;
@@ -334,18 +340,18 @@ QPushButton#DeleteBtn {
 }
 
 QPushButton#DeleteBtn:hover {
-    background-color: #f9e2af;
-    color: #181825;
+    background-color: $warning;
+    color: $bg_secondary;
 }
 
 QPushButton#DeleteBtn:pressed {
-    background-color: #f38ba8;
+    background-color: $error;
 }
 
 QTableWidget {
-    background-color: #1e1e2e;
-    color: #cdd6f4;
-    border: 1px solid #45475a;
+    background-color: $bg;
+    color: $text;
+    border: 1px solid $border;
     border-radius: 6px;
     font-size: 13px;
     outline: 0;
@@ -357,15 +363,15 @@ QTableWidget::item {
 }
 
 QTableWidget::item:selected {
-    background-color: #313244;
+    background-color: $bg_elevated;
 }
 
 QHeaderView::section {
-    background-color: #313244;
-    color: #a6adc8;
+    background-color: $bg_elevated;
+    color: $text_muted;
     border: none;
-    border-bottom: 1px solid #45475a;
-    border-right: 1px solid #45475a;
+    border-bottom: 1px solid $border;
+    border-right: 1px solid $border;
     padding: 5px 8px;
     font-size: 12px;
     font-weight: bold;
@@ -376,13 +382,13 @@ QHeaderView::section:last {
 }
 
 QScrollBar:vertical {
-    background: #1e1e2e;
+    background: $bg;
     width: 8px;
     border-radius: 4px;
 }
 
 QScrollBar::handle:vertical {
-    background: #45475a;
+    background: $border;
     border-radius: 4px;
     min-height: 20px;
 }
@@ -391,3 +397,7 @@ QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0;
 }
+"""
+)
+
+STYLE = _TEMPLATE.substitute(QSS_COLORS)
