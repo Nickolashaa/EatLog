@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import cast
 
 from PyQt6.QtCore import QDate, Qt, pyqtSignal
@@ -54,7 +54,13 @@ class MealLogTableWidget(QWidget):
 
     def _selected_date(self) -> date:
         qd = self.date_edit.date()
-        return date(qd.year(), qd.month(), qd.day())
+        return (
+            datetime(
+                year=qd.year(), month=qd.month(), day=qd.day(), hour=datetime.now().hour
+            )
+            .astimezone(timezone.utc)
+            .date()
+        )
 
     def _load(self) -> None:
         if not ProfileService.exists():

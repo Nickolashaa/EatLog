@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime, timezone
 from typing import cast
 
 from PyQt6.QtCore import Qt
@@ -102,7 +102,7 @@ class DailyReport(QWidget):
         self._worker = Worker(
             MealLogApiService.get_daily_totals,
             user_id=user_id,
-            target_date=date.today(),
+            target_date=datetime.now().astimezone(timezone.utc).date(),
         )
         self._worker.finished.connect(
             lambda totals: self._update_display(cast(MealLogTotals, totals), profile)
