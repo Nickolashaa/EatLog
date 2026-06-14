@@ -16,6 +16,7 @@ QSS_COLORS = {
     "text_disabled": "#6c7086",
     "primary": "#cba6f7",
     "secondary": "#89b4fa",
+    "secondary_hover": "#74c7ec",
     "success": "#a6e3a1",
     "warning": "#f9e2af",
     "error": "#f38ba8",
