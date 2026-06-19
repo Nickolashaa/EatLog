@@ -27,6 +27,9 @@ class ProfileForm(QWidget):
         self._init_ui(button_text)
 
     def _init_ui(self, button_text: str) -> None:
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Имя")
+
         self.gender_combo = QComboBox()
         for label, _ in GENDER_OPTIONS:
             self.gender_combo.addItem(label)
@@ -50,6 +53,7 @@ class ProfileForm(QWidget):
         form = QFormLayout()
         form.setSpacing(14)
         form.setContentsMargins(0, 0, 0, 0)
+        form.addRow("Имя:", self.name_input)
         form.addRow("Пол:", self.gender_combo)
         form.addRow("Вес (кг):", self.weight_input)
         form.addRow("Рост (см):", self.height_input)
@@ -66,6 +70,7 @@ class ProfileForm(QWidget):
         layout.addWidget(self.save_btn)
 
     def load(self, profile: ProfileBase) -> None:
+        self.name_input.setText(profile["name"])
         gender_idx = next(
             (i for i, (_, v) in enumerate(GENDER_OPTIONS) if v == profile["gender"]),
             0,
@@ -81,11 +86,12 @@ class ProfileForm(QWidget):
         self.goal_combo.setCurrentIndex(goal_idx)
 
     def get_values(self) -> ProfileBase | None:
+        name = self.name_input.text().strip()
         weight_text = self.weight_input.text().strip().replace(",", ".")
         height_text = self.height_input.text().strip().replace(",", ".")
         age_text = self.age_input.text().strip()
 
-        if not (weight_text and height_text and age_text):
+        if not (name and weight_text and height_text and age_text):
             return None
 
         try:
@@ -103,6 +109,7 @@ class ProfileForm(QWidget):
         ][1]
 
         return {
+            "name": name,
             "gender": gender,
             "weight": weight,
             "height": height,

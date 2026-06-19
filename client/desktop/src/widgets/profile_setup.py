@@ -159,7 +159,12 @@ class ProfileSetupDialog(QDialog):
         self._worker.start()
 
     def _finish(self, base: ProfileBase, uuid: str) -> None:
-        full: Profile = {**base, "uuid": uuid}
+        full: Profile = {
+            **base,
+            "uuid": uuid,
+            "notification_time": None,
+            "hard_mod": False,
+        }
         ProfileService.set_uuid(uuid)
         ProfileService.set_cache(full)
         self.accept()
