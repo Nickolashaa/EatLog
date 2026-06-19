@@ -1,44 +1,34 @@
-from typing import Literal, cast
-
 from PyQt6.QtCore import QSettings
 
 from .types import Kbzhu, Profile, ProfileBase
 
 
 class ProfileService:
+    _cache: Profile | None = None
+
     @staticmethod
     def exists() -> bool:
         return bool(QSettings("EatLog", "EatLog").value("profile/uuid"))
 
     @staticmethod
-    def load() -> Profile:
-        s = QSettings("EatLog", "EatLog")
-        return {
-            "uuid": str(s.value("profile/uuid")),
-            "gender": cast(Literal["male", "female"], s.value("profile/gender")),
-            "weight": float(s.value("profile/weight")),
-            "height": float(s.value("profile/height")),
-            "age": int(s.value("profile/age")),
-            "goal": cast(Literal["maintain", "lose", "gain"], s.value("profile/goal")),
-        }
+    def uuid() -> str:
+        return str(QSettings("EatLog", "EatLog").value("profile/uuid"))
 
-    @staticmethod
-    def save(profile: Profile) -> None:
-        s = QSettings("EatLog", "EatLog")
-        s.setValue("profile/uuid", profile["uuid"])
-        s.setValue("profile/gender", profile["gender"])
-        s.setValue("profile/weight", profile["weight"])
-        s.setValue("profile/height", profile["height"])
-        s.setValue("profile/age", profile["age"])
-        s.setValue("profile/goal", profile["goal"])
+    @classmethod
+    def set_uuid(cls, uuid: str) -> None:
+        QSettings("EatLog", "EatLog").setValue("profile/uuid", uuid)
 
-    @staticmethod
-    def telegram_linked() -> bool:
-        return QSettings("EatLog", "EatLog").value("profile/telegram_id") is not None
+    @classmethod
+    def load(cls) -> Profile:
+        if cls._cache is None:
+            from ..users import UserApiService
 
-    @staticmethod
-    def set_telegram_id(telegram_id: int) -> None:
-        QSettings("EatLog", "EatLog").setValue("profile/telegram_id", telegram_id)
+            cls._cache = UserApiService.get(cls.uuid())
+        return cls._cache
+
+    @classmethod
+    def set_cache(cls, profile: Profile) -> None:
+        cls._cache = profile
 
     @staticmethod
     def calculate(profile: ProfileBase) -> Kbzhu:

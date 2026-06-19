@@ -181,7 +181,7 @@ class MealSearch(QWidget):
         if not ProfileService.exists():
             return
 
-        user_id = ProfileService.load()["uuid"]
+        user_id = ProfileService.uuid()
 
         def on_added(_: object) -> None:
             grams_widget.clear()

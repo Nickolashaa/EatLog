@@ -2,6 +2,7 @@ from typing import Literal, TypedDict
 
 
 class ProfileBase(TypedDict):
+    name: str
     gender: Literal["male", "female"]
     weight: float
     height: float
@@ -11,6 +12,8 @@ class ProfileBase(TypedDict):
 
 class Profile(ProfileBase):
     uuid: str
+    notification_time: str | None
+    hard_mod: bool
 
 
 class Kbzhu(TypedDict):

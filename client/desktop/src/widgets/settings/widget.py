@@ -1,13 +1,16 @@
+from datetime import datetime
 from typing import cast
 
-from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtCore import Qt, QTime, QTimer, QUrl
 from PyQt6.QtGui import QDesktopServices, QHideEvent, QShowEvent
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QMessageBox,
     QPushButton,
+    QTimeEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -27,6 +30,8 @@ class SettingsWidget(QWidget):
         super().__init__(parent=parent)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self._val_labels: dict[str, QLabel] = {}
+        self._telegram_linked = False
+        self._profile: Profile | None = None
         self._init_ui()
         self._try_load_profile()
         self._telegram_timer = QTimer(self)
@@ -85,6 +90,39 @@ class SettingsWidget(QWidget):
 
         grid.setColumnStretch(1, 1)
 
+        self.notifications_section = QWidget()
+
+        notifications_title = QLabel("Уведомления")
+        notifications_title.setObjectName("SectionTitle")
+
+        self.notifications_check = QCheckBox("Получать уведомления")
+        self.notifications_check.toggled.connect(self._on_notifications_toggled)
+
+        self.notification_time_edit = QTimeEdit()
+        self.notification_time_edit.setDisplayFormat("HH:mm")
+        self.notification_time_edit.setTime(QTime(21, 0))
+        self.notification_time_edit.setMaximumWidth(130)
+        self.notification_time_edit.hide()
+
+        self.hard_mod_check = QCheckBox("Строгий режим")
+        self.hard_mod_check.hide()
+
+        self.notifications_save_btn = QPushButton("Сохранить")
+        self.notifications_save_btn.clicked.connect(self._on_save_notifications)
+
+        notifications_layout = QVBoxLayout(self.notifications_section)
+        notifications_layout.setSpacing(12)
+        notifications_layout.setContentsMargins(0, 0, 0, 0)
+        notifications_layout.addWidget(notifications_title)
+        notifications_layout.addWidget(self.notifications_check)
+        notifications_layout.addWidget(
+            self.notification_time_edit, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        notifications_layout.addWidget(self.hard_mod_check)
+        notifications_layout.addWidget(self.notifications_save_btn)
+
+        self.notifications_section.hide()
+
         self.telegram_title = QLabel("Telegram")
         self.telegram_title.setObjectName("SectionTitle")
 
@@ -107,6 +145,8 @@ class SettingsWidget(QWidget):
         right_layout.setSpacing(24)
         right_layout.addWidget(kbzhu_title)
         right_layout.addLayout(grid)
+        right_layout.addSpacing(8)
+        right_layout.addWidget(self.notifications_section)
         right_layout.addSpacing(8)
         right_layout.addWidget(self.telegram_title)
         right_layout.addWidget(self.telegram_hint)
@@ -132,10 +172,73 @@ class SettingsWidget(QWidget):
         self.setObjectName("SettingsWidget")
 
     def _try_load_profile(self) -> None:
-        if ProfileService.exists():
-            profile = ProfileService.load()
-            self.profile_form.load(profile)
-            self._update_kbzhu(ProfileService.calculate(profile))
+        if not ProfileService.exists():
+            return
+        self._profile_worker = Worker(ProfileService.load)
+        self._profile_worker.finished.connect(self._on_profile_loaded)
+        self._profile_worker.start()
+
+    def _on_profile_loaded(self, profile: object) -> None:
+        p = cast(Profile, profile)
+        self._profile = p
+        self.profile_form.load(p)
+        self._update_kbzhu(ProfileService.calculate(p))
+        self._load_notifications(p)
+
+    def _load_notifications(self, profile: Profile) -> None:
+        nt = profile["notification_time"]
+        if nt:
+            local = datetime.fromisoformat(nt).astimezone()
+            self.notification_time_edit.setTime(QTime(local.hour, local.minute))
+        self.notifications_check.setChecked(nt is not None)
+        self.notification_time_edit.setVisible(nt is not None)
+        self.hard_mod_check.setVisible(nt is not None)
+        self.hard_mod_check.setChecked(profile["hard_mod"])
+
+    def _on_notifications_toggled(self, checked: bool) -> None:
+        self.notification_time_edit.setVisible(checked)
+        self.hard_mod_check.setVisible(checked)
+
+    def _on_save_notifications(self) -> None:
+        if not ProfileService.exists():
+            return
+        if self.notifications_check.isChecked():
+            t = self.notification_time_edit.time()
+            local = (
+                datetime.now()
+                .astimezone()
+                .replace(hour=t.hour(), minute=t.minute(), second=0, microsecond=0)
+            )
+            notification_time: str | None = local.isoformat()
+        else:
+            notification_time = None
+        hard_mod = self.hard_mod_check.isChecked()
+        uuid = ProfileService.uuid()
+        self.notifications_save_btn.setEnabled(False)
+        self._notifications_worker = Worker(
+            UserApiService.update_notifications,
+            uuid=uuid,
+            notification_time=notification_time,
+            hard_mod=hard_mod,
+        )
+        self._notifications_worker.finished.connect(
+            lambda _: self._finish_notifications_save(notification_time, hard_mod)
+        )
+        self._notifications_worker.failed.connect(self._on_notifications_error)
+        self._notifications_worker.start()
+
+    def _finish_notifications_save(
+        self, notification_time: str | None, hard_mod: bool
+    ) -> None:
+        self.notifications_save_btn.setEnabled(True)
+        if self._profile is not None:
+            self._profile["notification_time"] = notification_time
+            self._profile["hard_mod"] = hard_mod
+            ProfileService.set_cache(self._profile)
+
+    def _on_notifications_error(self, msg: str) -> None:
+        self.notifications_save_btn.setEnabled(True)
+        QMessageBox.warning(self, "Ошибка", f"Не удалось сохранить уведомления:\n{msg}")
 
     def showEvent(self, event: QShowEvent | None) -> None:
         super().showEvent(event)
@@ -152,16 +255,28 @@ class SettingsWidget(QWidget):
         p = cast(ProfileBase, profile)
         if not ProfileService.exists():
             return
-        uuid = ProfileService.load()["uuid"]
+        uuid = ProfileService.uuid()
         self.profile_form.save_btn.setEnabled(False)
-        self._worker = Worker(UserApiService.update, uuid=uuid, profile=p)
+        self._worker = Worker(UserApiService.update_profile, uuid=uuid, profile=p)
         self._worker.finished.connect(lambda _: self._finish_save(p, uuid))
         self._worker.failed.connect(self._on_save_error)
         self._worker.start()
 
     def _finish_save(self, base: ProfileBase, uuid: str) -> None:
-        full: Profile = {**base, "uuid": uuid}
-        ProfileService.save(full)
+        prev = self._profile
+        full: Profile = {
+            "uuid": uuid,
+            "name": base["name"],
+            "gender": base["gender"],
+            "weight": base["weight"],
+            "height": base["height"],
+            "age": base["age"],
+            "goal": base["goal"],
+            "notification_time": prev["notification_time"] if prev else None,
+            "hard_mod": prev["hard_mod"] if prev else False,
+        }
+        self._profile = full
+        ProfileService.set_cache(full)
         self.profile_form.save_btn.setEnabled(True)
         self._update_kbzhu(ProfileService.calculate(full))
 
@@ -177,7 +292,7 @@ class SettingsWidget(QWidget):
                 "Сначала заполните профиль, чтобы привязать Telegram.",
             )
             return
-        uuid = ProfileService.load()["uuid"]
+        uuid = ProfileService.uuid()
         url = QUrl(f"https://t.me/{BOT_USERNAME}?start=reg_{uuid}")
         QDesktopServices.openUrl(url)
         if not self._telegram_timer.isActive():
@@ -186,8 +301,9 @@ class SettingsWidget(QWidget):
         self._sync_telegram()
 
     def _refresh_telegram_ui(self) -> None:
-        linked = ProfileService.telegram_linked()
+        linked = self._telegram_linked
         polling = self._telegram_timer.isActive()
+        self.notifications_section.setVisible(linked)
         self.telegram_title.setVisible(not linked)
         self.telegram_hint.setVisible(not linked)
         self.telegram_btn.setVisible(not linked and not polling)
@@ -200,10 +316,10 @@ class SettingsWidget(QWidget):
             self._telegram_timer.stop()
 
     def _sync_telegram(self) -> None:
-        if ProfileService.telegram_linked() or not ProfileService.exists():
+        if self._telegram_linked or not ProfileService.exists():
             self._telegram_timer.stop()
             return
-        uuid = ProfileService.load()["uuid"]
+        uuid = ProfileService.uuid()
         self._telegram_worker = Worker(UserApiService.get_telegram_id, uuid)
         self._telegram_worker.finished.connect(self._on_telegram_checked)
         self._telegram_worker.start()
@@ -211,7 +327,7 @@ class SettingsWidget(QWidget):
     def _on_telegram_checked(self, telegram_id: object) -> None:
         if telegram_id is None:
             return
-        ProfileService.set_telegram_id(cast(int, telegram_id))
+        self._telegram_linked = True
         self._refresh_telegram_ui()
 
     def _update_kbzhu(self, kbzhu: Kbzhu) -> None:

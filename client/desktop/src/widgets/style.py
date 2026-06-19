@@ -211,6 +211,30 @@ QPushButton#TelegramBtn:pressed {
     background-color: $secondary;
 }
 
+QCheckBox {
+    color: $text;
+    font-size: 16px;
+    background: transparent;
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border: 1px solid $border;
+    border-radius: 4px;
+    background-color: $bg_elevated;
+}
+
+QCheckBox::indicator:hover {
+    border-color: $border_focus;
+}
+
+QCheckBox::indicator:checked {
+    background-color: $primary;
+    border-color: $primary;
+}
+
 QLineEdit {
     background-color: $bg_elevated;
     color: $text;
@@ -250,6 +274,33 @@ QComboBox QAbstractItemView {
     selection-color: $bg;
     outline: 0;
     font-size: 15px;
+}
+
+QTimeEdit {
+    background-color: $bg_elevated;
+    color: $text;
+    border: 1px solid $border;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+QTimeEdit:focus {
+    border-color: $border_focus;
+}
+
+QTimeEdit::up-button,
+QTimeEdit::down-button {
+    width: 24px;
+    border: none;
+    border-radius: 0;
+    background-color: $bg_elevated;
+}
+
+QTimeEdit::up-button:hover,
+QTimeEdit::down-button:hover {
+    background-color: $border;
 }
 
 QDateEdit {

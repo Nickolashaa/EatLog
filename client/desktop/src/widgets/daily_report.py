@@ -96,16 +96,20 @@ class DailyReport(QWidget):
         if not ProfileService.exists():
             return
 
-        profile = ProfileService.load()
-        user_id = profile["uuid"]
+        self._profile_worker = Worker(ProfileService.load)
+        self._profile_worker.finished.connect(self._on_profile_loaded)
+        self._profile_worker.failed.connect(self._on_error)
+        self._profile_worker.start()
 
+    def _on_profile_loaded(self, profile: object) -> None:
+        p = cast(Profile, profile)
         self._worker = Worker(
             MealLogApiService.get_daily_totals,
-            user_id=user_id,
+            user_id=p["uuid"],
             target_date=datetime.now().astimezone(timezone.utc).date(),
         )
         self._worker.finished.connect(
-            lambda totals: self._update_display(cast(MealLogTotals, totals), profile)
+            lambda totals: self._update_display(cast(MealLogTotals, totals), p)
         )
         self._worker.failed.connect(self._on_error)
         self._worker.start()
