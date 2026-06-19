@@ -65,7 +65,7 @@ class MealLogTableWidget(QWidget):
     def _load(self) -> None:
         if not ProfileService.exists():
             return
-        user_id = ProfileService.load()["uuid"]
+        user_id = ProfileService.uuid()
         self._load_worker = Worker(
             MealLogApiService.get_table_list,
             user_id=user_id,
@@ -108,7 +108,7 @@ class MealLogTableWidget(QWidget):
         except ValueError:
             return
 
-        user_id = ProfileService.load()["uuid"]
+        user_id = ProfileService.uuid()
         self._save_worker = Worker(
             MealLogApiService.update,
             log_id=log_row["log_id"],

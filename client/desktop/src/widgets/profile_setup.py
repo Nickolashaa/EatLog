@@ -137,7 +137,9 @@ class ProfileSetupDialog(QDialog):
         self._worker.start()
 
     def _finish_login(self, profile: object) -> None:
-        ProfileService.save(cast(Profile, profile))
+        p = cast(Profile, profile)
+        ProfileService.set_uuid(p["uuid"])
+        ProfileService.set_cache(p)
         self.accept()
 
     def _on_login_error(self, msg: str) -> None:
@@ -158,7 +160,8 @@ class ProfileSetupDialog(QDialog):
 
     def _finish(self, base: ProfileBase, uuid: str) -> None:
         full: Profile = {**base, "uuid": uuid}
-        ProfileService.save(full)
+        ProfileService.set_uuid(uuid)
+        ProfileService.set_cache(full)
         self.accept()
 
     def _on_error(self, msg: str) -> None:

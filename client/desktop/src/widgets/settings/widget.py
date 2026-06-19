@@ -27,6 +27,7 @@ class SettingsWidget(QWidget):
         super().__init__(parent=parent)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self._val_labels: dict[str, QLabel] = {}
+        self._telegram_linked = False
         self._init_ui()
         self._try_load_profile()
         self._telegram_timer = QTimer(self)
@@ -132,10 +133,16 @@ class SettingsWidget(QWidget):
         self.setObjectName("SettingsWidget")
 
     def _try_load_profile(self) -> None:
-        if ProfileService.exists():
-            profile = ProfileService.load()
-            self.profile_form.load(profile)
-            self._update_kbzhu(ProfileService.calculate(profile))
+        if not ProfileService.exists():
+            return
+        self._profile_worker = Worker(ProfileService.load)
+        self._profile_worker.finished.connect(self._on_profile_loaded)
+        self._profile_worker.start()
+
+    def _on_profile_loaded(self, profile: object) -> None:
+        p = cast(Profile, profile)
+        self.profile_form.load(p)
+        self._update_kbzhu(ProfileService.calculate(p))
 
     def showEvent(self, event: QShowEvent | None) -> None:
         super().showEvent(event)
@@ -152,7 +159,7 @@ class SettingsWidget(QWidget):
         p = cast(ProfileBase, profile)
         if not ProfileService.exists():
             return
-        uuid = ProfileService.load()["uuid"]
+        uuid = ProfileService.uuid()
         self.profile_form.save_btn.setEnabled(False)
         self._worker = Worker(UserApiService.update, uuid=uuid, profile=p)
         self._worker.finished.connect(lambda _: self._finish_save(p, uuid))
@@ -161,7 +168,7 @@ class SettingsWidget(QWidget):
 
     def _finish_save(self, base: ProfileBase, uuid: str) -> None:
         full: Profile = {**base, "uuid": uuid}
-        ProfileService.save(full)
+        ProfileService.set_cache(full)
         self.profile_form.save_btn.setEnabled(True)
         self._update_kbzhu(ProfileService.calculate(full))
 
@@ -177,7 +184,7 @@ class SettingsWidget(QWidget):
                 "Сначала заполните профиль, чтобы привязать Telegram.",
             )
             return
-        uuid = ProfileService.load()["uuid"]
+        uuid = ProfileService.uuid()
         url = QUrl(f"https://t.me/{BOT_USERNAME}?start=reg_{uuid}")
         QDesktopServices.openUrl(url)
         if not self._telegram_timer.isActive():
@@ -186,7 +193,7 @@ class SettingsWidget(QWidget):
         self._sync_telegram()
 
     def _refresh_telegram_ui(self) -> None:
-        linked = ProfileService.telegram_linked()
+        linked = self._telegram_linked
         polling = self._telegram_timer.isActive()
         self.telegram_title.setVisible(not linked)
         self.telegram_hint.setVisible(not linked)
@@ -200,10 +207,10 @@ class SettingsWidget(QWidget):
             self._telegram_timer.stop()
 
     def _sync_telegram(self) -> None:
-        if ProfileService.telegram_linked() or not ProfileService.exists():
+        if self._telegram_linked or not ProfileService.exists():
             self._telegram_timer.stop()
             return
-        uuid = ProfileService.load()["uuid"]
+        uuid = ProfileService.uuid()
         self._telegram_worker = Worker(UserApiService.get_telegram_id, uuid)
         self._telegram_worker.finished.connect(self._on_telegram_checked)
         self._telegram_worker.start()
@@ -211,7 +218,7 @@ class SettingsWidget(QWidget):
     def _on_telegram_checked(self, telegram_id: object) -> None:
         if telegram_id is None:
             return
-        ProfileService.set_telegram_id(cast(int, telegram_id))
+        self._telegram_linked = True
         self._refresh_telegram_ui()
 
     def _update_kbzhu(self, kbzhu: Kbzhu) -> None:
