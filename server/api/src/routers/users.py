@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ..di.users import get_user_service
-from ..schemas.users import UserInput, UserRegister, UserResponse
+from ..schemas.users import UserInput, UserRegister, UserResponse, UserUpdate
 from ..services.exceptions import ObjectNotFound
 from ..services.users.service import UserService
 
@@ -36,11 +36,14 @@ async def create_user(
 ) -> UserResponse:
     return await service.create(
         telegram_id=input.telegram_id,
+        name=input.name,
         gender=input.gender,
         weight=input.weight,
         height=input.height,
         age=input.age,
         goal=input.goal,
+        notification_time=input.notification_time,
+        hard_mod=input.hard_mod,
     )
 
 
@@ -57,19 +60,11 @@ async def register_user(
 @router.put("/{id}")
 async def update_user(
     id: UUID,
-    input: UserInput,
+    input: UserUpdate,
     service: UserService = Depends(get_user_service),
 ) -> UserResponse:
     try:
-        return await service.update(
-            id=id,
-            telegram_id=input.telegram_id,
-            gender=input.gender,
-            weight=input.weight,
-            height=input.height,
-            age=input.age,
-            goal=input.goal,
-        )
+        return await service.update(id=id, **input.model_dump(exclude_unset=True))
     except ObjectNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
