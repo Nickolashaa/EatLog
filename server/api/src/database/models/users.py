@@ -2,8 +2,9 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, func, text
+from sqlalchemy import BigInteger, DateTime, func, text
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.sql import expression
 
 from ..connection import Base
 
@@ -35,3 +36,6 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now()
     )
+    notification_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    hard_mod: Mapped[bool] = mapped_column(server_default=expression.false())
+    name: Mapped[str]
