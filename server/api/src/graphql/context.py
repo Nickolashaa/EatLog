@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import strawberry
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry.fastapi import BaseContext
@@ -23,3 +24,6 @@ async def context_getter(
         session=session,
         user_service=user_service,
     )
+
+
+AppInfo = strawberry.Info[Context]
