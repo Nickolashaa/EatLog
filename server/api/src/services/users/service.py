@@ -5,8 +5,8 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database.models.users import User
-from ...schemas.users import UserResponse
 from ..exceptions import ObjectNotFound
+from .schemas import UserResponse
 from .types import UserCreateParams, UserUpdateParams
 
 
@@ -20,7 +20,7 @@ class UserService:
         instance = res.scalar_one_or_none()
         if instance is None:
             raise ObjectNotFound(message="User not found", id=id)
-        return UserResponse.model_validate(instance)
+        return UserResponse.model_validate(instance, from_attributes=True)
 
     async def get_by_telegram_id(self, telegram_id: int) -> UserResponse:
         stmt = select(User).where(User.telegram_id == telegram_id)
@@ -28,31 +28,22 @@ class UserService:
         instance = res.scalar_one_or_none()
         if instance is None:
             raise ObjectNotFound(message="User not found", telegram_id=telegram_id)
-        return UserResponse.model_validate(instance)
+        return UserResponse.model_validate(instance, from_attributes=True)
 
     async def create(self, **values: Unpack[UserCreateParams]) -> UserResponse:
-        stmt = insert(User).values(values).returning(User)
+        stmt = insert(User).values(**values).returning(User)
         res = await self.session.execute(stmt)
-        return UserResponse.model_validate(res.scalar_one())
-
-    async def register(self, id: UUID, telegram_id: int) -> UserResponse:
-        stmt = (
-            update(User)
-            .where(User.telegram_id == telegram_id, User.id != id)
-            .values(telegram_id=None)
-        )
-        await self.session.execute(stmt)
-        return await self.update(id=id, telegram_id=telegram_id)
+        return UserResponse.model_validate(res.scalar_one(), from_attributes=True)
 
     async def update(
         self, id: UUID, **values: Unpack[UserUpdateParams]
     ) -> UserResponse:
-        stmt = update(User).where(User.id == id).values(values).returning(User)
+        stmt = update(User).where(User.id == id).values(**values).returning(User)
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
             raise ObjectNotFound(message="User not found", id=id)
-        return UserResponse.model_validate(instance)
+        return UserResponse.model_validate(instance, from_attributes=True)
 
     async def delete(self, id: UUID) -> None:
         stmt = delete(User).where(User.id == id)
