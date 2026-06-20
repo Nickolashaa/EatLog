@@ -22,7 +22,7 @@ class UserService:
             raise ObjectNotFound(message="User not found", id=id)
         return UserResponse.model_validate(instance, from_attributes=True)
 
-    async def get_by_telegram_id(self, telegram_id: int) -> UserResponse:
+    async def get_by_telegram_id(self, telegram_id: str) -> UserResponse:
         stmt = select(User).where(User.telegram_id == telegram_id)
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()

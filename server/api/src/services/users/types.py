@@ -6,7 +6,7 @@ type GOAL = Literal["MAINTAIN", "LOSE", "GAIN"]
 
 
 class UserCreateParams(TypedDict):
-    telegram_id: Required[int | None]
+    telegram_id: Required[str | None]
     name: Required[str]
     gender: Required[GENDER]
     weight: Required[float]
@@ -18,7 +18,7 @@ class UserCreateParams(TypedDict):
 
 
 class UserUpdateParams(TypedDict):
-    telegram_id: NotRequired[int | None]
+    telegram_id: NotRequired[str | None]
     name: NotRequired[str]
     gender: NotRequired[GENDER]
     weight: NotRequired[float]
