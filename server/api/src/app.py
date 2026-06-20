@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import meal_log, meals, users
-
 app = FastAPI(title="EatLog API")
 
 app.add_middleware(
@@ -11,10 +9,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.include_router(meals.router)
-app.include_router(meal_log.router)
-app.include_router(users.router)
 
 
 @app.get("/health")
