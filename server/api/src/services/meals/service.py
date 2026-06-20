@@ -23,7 +23,7 @@ class MealService:
         return MealResponse.model_validate(instance, from_attributes=True)
 
     async def get_list(
-        self, limit: int = 10, **filters: Unpack[MealListFilters]
+        self, limit: int = 10, offset: int = 10, **filters: Unpack[MealListFilters]
     ) -> list[MealResponse]:
         stmt = select(Meal).order_by(Meal.title)
         if search_query := filters.get("search_query"):
@@ -35,7 +35,9 @@ class MealService:
                     Meal.title.icontains(search_query.capitalize()),
                 )
             )
-        stmt = stmt.limit(limit)
+
+        stmt = stmt.limit(limit).offset(offset)
+
         res = await self.session.execute(stmt)
         return [
             MealResponse.model_validate(instance, from_attributes=True)
