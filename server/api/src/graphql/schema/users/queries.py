@@ -3,6 +3,7 @@ from uuid import UUID
 import strawberry
 
 from ....services.exceptions import ObjectNotFound
+from ...context import AppInfo
 from ...types.errors import ObjectNotFoundError
 from ...types.users import GetUserOrError, User
 
@@ -13,7 +14,7 @@ class UsersQuery:
     async def user(
         self,
         id: UUID,
-        info: strawberry.Info,
+        info: AppInfo,
     ) -> GetUserOrError:
         try:
             return User.from_schema(
@@ -28,7 +29,7 @@ class UsersQuery:
     async def user_by_telegram_id(
         self,
         telegram_id: str,
-        info: strawberry.Info,
+        info: AppInfo,
     ) -> GetUserOrError:
         try:
             return User.from_schema(

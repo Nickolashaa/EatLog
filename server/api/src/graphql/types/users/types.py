@@ -28,7 +28,7 @@ class User:
         return cls(
             id=instance.id,
             name=instance.name,
-            telegram_id=str(instance.telegram_id),
+            telegram_id=instance.telegram_id,
             gender=Gender[instance.gender],
             weight=instance.weight,
             height=instance.height,

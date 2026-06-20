@@ -1,5 +1,6 @@
 import strawberry
 
+from .users.mutations import UsersMutation
 from .users.queries import UsersQuery
 
 
@@ -10,4 +11,11 @@ class Query(
     pass
 
 
-schema = strawberry.Schema(query=Query)
+@strawberry.type
+class Mutation(
+    UsersMutation,
+):
+    pass
+
+
+schema = strawberry.Schema(query=Query, mutation=Mutation)
