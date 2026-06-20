@@ -36,7 +36,7 @@ class MealService:
                 )
             )
 
-        stmt = stmt.limit(limit).offset(offset)
+        stmt = stmt.offset(offset).limit(limit)
 
         res = await self.session.execute(stmt)
         return [
