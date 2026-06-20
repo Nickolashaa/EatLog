@@ -4,8 +4,8 @@ from uuid import UUID
 
 
 class MealLogListFilters(TypedDict):
+    user_id: NotRequired[UUID]
     date_filter: NotRequired[date]
-    offset: NotRequired[int]
 
 
 class MealLogCreateParams(TypedDict):
@@ -15,5 +15,6 @@ class MealLogCreateParams(TypedDict):
 
 
 class MealLogUpdateParams(TypedDict):
+    user_id: NotRequired[UUID]
     meal_id: NotRequired[int]
     grams: NotRequired[float]
