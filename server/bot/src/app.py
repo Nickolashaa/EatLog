@@ -4,8 +4,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
 
 from .config import BOT_TOKEN
-from .di.session import SessionMiddleware
-from .di.users import UserServiceMiddleware
+from .middlewares.session import SessionMiddleware
+from .middlewares.users import UserServiceMiddleware
 from .routers import start
 
 session = AiohttpSession()
