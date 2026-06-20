@@ -23,3 +23,18 @@ class UsersQuery:
             )
         except ObjectNotFound as e:
             return ObjectNotFoundError.from_exception(e)
+
+    @strawberry.field
+    async def user_by_telegram_id(
+        self,
+        telegram_id: str,
+        info: strawberry.Info,
+    ) -> GetUserOrError:
+        try:
+            return User.from_schema(
+                instance=await info.context.user_service.get_by_telegram_id(
+                    telegram_id=int(telegram_id),
+                )
+            )
+        except ObjectNotFound as e:
+            return ObjectNotFoundError.from_exception(e)
