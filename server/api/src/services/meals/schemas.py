@@ -14,11 +14,3 @@ class MealResponse(BaseModel):
     carbohydrate: float
     created_at: datetime
     updated_at: datetime
-
-
-class MealInput(BaseModel):
-    title: str
-    calories: float
-    protein: float
-    fat: float
-    carbohydrate: float

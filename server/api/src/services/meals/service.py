@@ -5,8 +5,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database.models.meals import Meal
-from ...schemas.meals import MealResponse
 from ..exceptions import ObjectAlreadyExists, ObjectNotFound
+from .schemas import MealResponse
 from .types import MealCreateParams, MealListFilters, MealUpdateParams
 
 
@@ -20,9 +20,11 @@ class MealService:
         instance = res.scalar_one_or_none()
         if instance is None:
             raise ObjectNotFound(message="Meal not found", id=id)
-        return MealResponse.model_validate(instance)
+        return MealResponse.model_validate(instance, from_attributes=True)
 
-    async def get_list(self, **filters: Unpack[MealListFilters]) -> list[MealResponse]:
+    async def get_list(
+        self, limit: int = 10, **filters: Unpack[MealListFilters]
+    ) -> list[MealResponse]:
         stmt = select(Meal).order_by(Meal.title)
         if search_query := filters.get("search_query"):
             stmt = stmt.where(
@@ -33,18 +35,18 @@ class MealService:
                     Meal.title.icontains(search_query.capitalize()),
                 )
             )
-        if offset := filters.get("offset"):
-            stmt = stmt.offset(offset)
-        if limit := filters.get("limit"):
-            stmt = stmt.limit(limit)
+        stmt = stmt.limit(limit)
         res = await self.session.execute(stmt)
-        return [MealResponse.model_validate(m) for m in res.scalars().all()]
+        return [
+            MealResponse.model_validate(instance, from_attributes=True)
+            for instance in res.scalars().all()
+        ]
 
     async def create(self, **values: Unpack[MealCreateParams]) -> MealResponse:
         try:
             stmt = insert(Meal).values(values).returning(Meal)
             res = await self.session.execute(stmt)
-            return MealResponse.model_validate(res.scalar_one())
+            return MealResponse.model_validate(res.scalar_one(), from_attributes=True)
         except IntegrityError:
             raise ObjectAlreadyExists(
                 message="Meal already exists", title=values.get("title")
@@ -57,7 +59,7 @@ class MealService:
             instance = res.scalar_one_or_none()
             if instance is None:
                 raise ObjectNotFound(message="Meal not found", id=id)
-            return MealResponse.model_validate(instance)
+            return MealResponse.model_validate(instance, from_attributes=True)
         except IntegrityError:
             raise ObjectAlreadyExists(
                 message="Meal already exists", title=values.get("title")
