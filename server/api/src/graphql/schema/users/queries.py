@@ -33,7 +33,7 @@ class UsersQuery:
         try:
             return User.from_schema(
                 instance=await info.context.user_service.get_by_telegram_id(
-                    telegram_id=int(telegram_id),
+                    telegram_id=telegram_id,
                 )
             )
         except ObjectNotFound as e:
