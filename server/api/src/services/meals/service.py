@@ -23,7 +23,7 @@ class MealService:
         return MealResponse.model_validate(instance, from_attributes=True)
 
     async def get_list(
-        self, limit: int = 10, offset: int = 10, **filters: Unpack[MealListFilters]
+        self, limit: int = 10, offset: int = 0, **filters: Unpack[MealListFilters]
     ) -> list[MealResponse]:
         stmt = select(Meal).order_by(Meal.title)
         if search_query := filters.get("search_query"):
