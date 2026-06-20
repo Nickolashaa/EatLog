@@ -1,7 +1,8 @@
 from datetime import datetime
+from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from .types import GENDER, GOAL
 
@@ -21,3 +22,8 @@ class UserResponse(BaseModel):
     hard_mod: bool
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("gender", "goal", mode="before")
+    @classmethod
+    def _enum_to_literal(cls, value: Enum | str) -> str:
+        return value.name if isinstance(value, Enum) else value
