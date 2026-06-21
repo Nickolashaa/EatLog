@@ -3,7 +3,6 @@ query GetUserByTelegramId($telegramId: String!){
     telegramId: $telegramId,
   )
   {
-    __typename
     ... on User {
       id
       name

@@ -1,6 +1,5 @@
 mutation UpdateUser($id: UUID!, $input: UpdateUserInput!) {
   updateUser(id: $id, input: $input) {
-    __typename
     ... on User {
       ...UserFields
     }
