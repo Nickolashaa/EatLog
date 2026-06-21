@@ -18,6 +18,11 @@ from .get_user_by_telegram_id import (
     GetUserByTelegramIdUserByTelegramIdUser,
 )
 from .input_types import CreateUserInput, UpdateUserInput
+from .update_user import (
+    UpdateUser,
+    UpdateUserUpdateUserObjectNotFoundError,
+    UpdateUserUpdateUserUser,
+)
 
 __all__ = [
     "AsyncBaseClient",
@@ -34,7 +39,10 @@ __all__ = [
     "GraphQLClientGraphQLMultiError",
     "GraphQLClientHttpError",
     "GraphQLClientInvalidResponseError",
+    "UpdateUser",
     "UpdateUserInput",
+    "UpdateUserUpdateUserObjectNotFoundError",
+    "UpdateUserUpdateUserUser",
     "Upload",
     "UserFields",
 ]

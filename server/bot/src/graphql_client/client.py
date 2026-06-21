@@ -2,16 +2,50 @@
 # Source: ./src/graphql/
 
 from typing import Any
+from uuid import UUID
 
 from .async_base_client import AsyncBaseClient
 from .get_user_by_telegram_id import GetUserByTelegramId
+from .input_types import UpdateUserInput
+from .update_user import UpdateUser
 
 
-def gql(q: str) -> str:  # Функция разъеб, спасибо! Ставлю лосяру!"
+def gql(q: str) -> str:
     return q
 
 
 class Client(AsyncBaseClient):
+    async def update_user(
+        self, id: UUID, input: UpdateUserInput, **kwargs: Any
+    ) -> UpdateUser:
+        query = gql("""
+            mutation UpdateUser($id: UUID!, $input: UpdateUserInput!) {
+              updateUser(id: $id, input: $input) {
+                __typename
+                ... on User {
+                  ...UserFields
+                }
+                ... on ObjectNotFoundError {
+                  message
+                }
+              }
+            }
+
+            fragment UserFields on User {
+              id
+              name
+              telegramId
+              notificationTime
+              hardMod
+            }
+            """)
+        variables: dict[str, object] = {"id": id, "input": input}
+        response = await self.execute(
+            query=query, operation_name="UpdateUser", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateUser.model_validate(data)
+
     async def get_user_by_telegram_id(
         self, telegram_id: str, **kwargs: Any
     ) -> GetUserByTelegramId:
