@@ -1,0 +1,16 @@
+query GetUserByTelegramId($telegramId: String!){
+  userByTelegramId(
+    telegramId: $telegramId,
+  )
+  {
+    __typename
+    ... on User {
+      id
+      name
+      telegramId
+    }
+    ... on ObjectNotFoundError {
+      message
+    }
+  }
+}
