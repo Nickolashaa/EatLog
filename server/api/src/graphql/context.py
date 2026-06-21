@@ -5,8 +5,8 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry.fastapi import BaseContext
 
-from ..di.session import get_session
-from ..di.users import get_user_service
+from ..dependencies.session import get_session
+from ..dependencies.users import get_user_service
 from ..services.users import UserService
 
 
