@@ -1,0 +1,80 @@
+interface BaseErrorInterface {
+  message: String!
+}
+
+input CreateUserInput {
+  name: String!
+  telegramId: String = null
+  gender: Gender!
+  weight: Float!
+  height: Float!
+  age: Int!
+  goal: Goal!
+  notificationTime: DateTime = null
+  hardMod: Boolean! = false
+}
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+union GetUserOrError = User | ObjectNotFoundError
+
+enum Goal {
+  MAINTAIN
+  LOSE
+  GAIN
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: UUID!, input: UpdateUserInput!): UpdateUserOrError!
+  deleteUser(id: UUID!): Void
+}
+
+type ObjectNotFoundError implements BaseErrorInterface {
+  message: String!
+}
+
+type Query {
+  user(id: UUID!): GetUserOrError!
+  userByTelegramId(telegramId: String!): GetUserOrError!
+}
+
+scalar UUID
+
+input UpdateUserInput {
+  name: String
+  telegramId: String
+  gender: Gender
+  weight: Float
+  height: Float
+  age: Int
+  goal: Goal
+  notificationTime: DateTime
+  hardMod: Boolean
+}
+
+union UpdateUserOrError = User | ObjectNotFoundError
+
+type User {
+  id: UUID!
+  name: String!
+  telegramId: String
+  gender: Gender!
+  weight: Float!
+  height: Float!
+  age: Int!
+  goal: Goal!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  notificationTime: DateTime
+  hardMod: Boolean!
+}
+
+"""Represents NULL values"""
+scalar Void
