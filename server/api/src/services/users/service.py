@@ -1,7 +1,7 @@
 from typing import Unpack
 from uuid import UUID
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database.models.users import User
@@ -42,7 +42,3 @@ class UserService:
         if instance is None:
             raise ObjectNotFound(message="User not found", id=id)
         return UserSchema.model_validate(instance, from_attributes=True)
-
-    async def delete(self, id: UUID) -> None:
-        stmt = delete(User).where(User.id == id)
-        await self.session.execute(stmt)

@@ -35,12 +35,3 @@ class UsersMutation:
             return User.from_schema(instance)
         except ObjectNotFound as e:
             return ObjectNotFoundError.from_exception(e)
-
-    @strawberry.mutation
-    async def delete_user(
-        self,
-        info: AppInfo,
-        id: UUID,
-    ) -> None:
-        await info.context.user_service.delete(id)
-        await info.context.session.commit()
