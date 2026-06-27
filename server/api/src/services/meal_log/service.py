@@ -25,14 +25,6 @@ class MealLogService:
             return ObjectNotFound(message="User not found", id=user_id)
         return ObjectNotFound(message="Meal not found", id=meal_id)
 
-    async def get(self, id: int) -> MealLogSchema:
-        stmt = select(MealLog).where(MealLog.id == id)
-        res = await self.session.execute(stmt)
-        instance = res.scalar_one_or_none()
-        if instance is None:
-            raise ObjectNotFound(message="MealLog not found", id=id)
-        return MealLogSchema.model_validate(instance, from_attributes=True)
-
     async def get_list(
         self, limit: int = 10, offset: int = 0, **filters: Unpack[MealLogListFilters]
     ) -> list[MealLogSchema]:
