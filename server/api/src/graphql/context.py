@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-import strawberry
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from strawberry import Info
 from strawberry.fastapi import BaseContext
 
 from ..dependencies.meal_logs import get_meal_log_service
@@ -12,6 +12,8 @@ from ..dependencies.users import get_user_service
 from ..services.meal_logs import MealLogService
 from ..services.meals import MealService
 from ..services.users import UserService
+from .data_loaders.meals import MEAL_DATA_LOADER, build_meal_data_loader
+from .data_loaders.users import USER_DATA_LOADER, build_user_data_loader
 
 
 @dataclass(slots=True)
@@ -20,6 +22,8 @@ class Context(BaseContext):
     user_service: UserService
     meal_service: MealService
     meal_log_service: MealLogService
+    user_data_loader: USER_DATA_LOADER
+    meal_data_loader: MEAL_DATA_LOADER
 
 
 async def context_getter(
@@ -33,7 +37,9 @@ async def context_getter(
         user_service=user_service,
         meal_service=meal_service,
         meal_log_service=meal_log_service,
+        user_data_loader=build_user_data_loader(user_service),
+        meal_data_loader=build_meal_data_loader(meal_service),
     )
 
 
-AppInfo = strawberry.Info[Context]
+AppInfo = Info[Context]
