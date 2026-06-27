@@ -9,21 +9,20 @@ from ..dependencies.meal_logs import get_meal_log_service
 from ..dependencies.meals import get_meal_service
 from ..dependencies.session import get_session
 from ..dependencies.users import get_user_service
+from ..services import Services
 from ..services.meal_logs import MealLogService
 from ..services.meals import MealService
 from ..services.users import UserService
-from .data_loaders.meals import MEAL_DATA_LOADER, build_meal_data_loader
-from .data_loaders.users import USER_DATA_LOADER, build_user_data_loader
+from .data_loaders import DataLoaders
+from .data_loaders.meals import build_meal_data_loader
+from .data_loaders.users import build_user_data_loader
 
 
 @dataclass(slots=True)
 class Context(BaseContext):
     session: AsyncSession
-    user_service: UserService
-    meal_service: MealService
-    meal_log_service: MealLogService
-    user_data_loader: USER_DATA_LOADER
-    meal_data_loader: MEAL_DATA_LOADER
+    services: Services
+    data_loaders: DataLoaders
 
 
 async def context_getter(
@@ -34,11 +33,15 @@ async def context_getter(
 ) -> Context:
     return Context(
         session=session,
-        user_service=user_service,
-        meal_service=meal_service,
-        meal_log_service=meal_log_service,
-        user_data_loader=build_user_data_loader(user_service),
-        meal_data_loader=build_meal_data_loader(meal_service),
+        services=Services(
+            user_service=user_service,
+            meal_service=meal_service,
+            meal_log_service=meal_log_service,
+        ),
+        data_loaders=DataLoaders(
+            user_data_loader=build_user_data_loader(user_service),
+            meal_data_loader=build_meal_data_loader(meal_service),
+        ),
     )
 
 

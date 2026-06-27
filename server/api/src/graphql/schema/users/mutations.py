@@ -16,7 +16,9 @@ class UsersMutation:
         info: AppInfo,
         input: CreateUserInput,
     ) -> User:
-        instance = await info.context.user_service.create(**input.to_service_params())
+        instance = await info.context.services.user_service.create(
+            **input.to_service_params()
+        )
         await info.context.session.commit()
         return User.from_schema(instance)
 
@@ -28,7 +30,7 @@ class UsersMutation:
         input: UpdateUserInput,
     ) -> UpdateUserOrError:
         try:
-            instance = await info.context.user_service.update(
+            instance = await info.context.services.user_service.update(
                 id=id, **input.to_service_params()
             )
             await info.context.session.commit()

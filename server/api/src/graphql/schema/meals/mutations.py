@@ -15,7 +15,7 @@ class MealsMutation:
         input: CreateMealInput,
     ) -> CreateMealOrError:
         try:
-            instance = await info.context.meal_service.create(
+            instance = await info.context.services.meal_service.create(
                 **input.to_service_params(),
             )
             await info.context.session.commit()

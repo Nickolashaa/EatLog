@@ -21,11 +21,11 @@ class MealLog:
 
     @strawberry.field
     async def user(self, info: AppInfo) -> User:
-        return await info.context.user_data_loader.load(self.user_id)
+        return await info.context.data_loaders.user_data_loader.load(self.user_id)
 
     @strawberry.field
     async def meal(self, info: AppInfo) -> Meal:
-        return await info.context.meal_data_loader.load(self.meal_id)
+        return await info.context.data_loaders.meal_data_loader.load(self.meal_id)
 
     @classmethod
     def from_schema(cls, instance: MealLogSchema) -> Self:

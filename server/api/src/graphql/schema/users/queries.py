@@ -18,7 +18,7 @@ class UsersQuery:
     ) -> GetUserOrError:
         try:
             return User.from_schema(
-                instance=await info.context.user_service.get(
+                instance=await info.context.services.user_service.get(
                     id=id,
                 )
             )
@@ -33,7 +33,7 @@ class UsersQuery:
     ) -> GetUserOrError:
         try:
             return User.from_schema(
-                instance=await info.context.user_service.get_by_telegram_id(
+                instance=await info.context.services.user_service.get_by_telegram_id(
                     telegram_id=telegram_id,
                 )
             )

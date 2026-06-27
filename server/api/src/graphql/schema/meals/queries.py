@@ -20,7 +20,7 @@ class MealsQuery:
     ) -> list[Meal]:
         return [
             Meal.from_schema(instance)
-            for instance in await info.context.meal_service.get_list(
+            for instance in await info.context.services.meal_service.get_list(
                 limit=limit,
                 offset=offset,
                 **filter.to_service_params() if filter is not None else {},

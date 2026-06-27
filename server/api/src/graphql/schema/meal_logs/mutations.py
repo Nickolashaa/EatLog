@@ -21,7 +21,7 @@ class MealLogsMutation:
         input: CreateMealLogInput,
     ) -> CreateMealLogOrError:
         try:
-            instance = await info.context.meal_log_service.create(
+            instance = await info.context.services.meal_log_service.create(
                 **input.to_service_params(),
             )
             await info.context.session.commit()
@@ -38,7 +38,7 @@ class MealLogsMutation:
         input: UpdateMealLogInput,
     ) -> UpdateMealLogOrError:
         try:
-            instance = await info.context.meal_log_service.update(
+            instance = await info.context.services.meal_log_service.update(
                 id=id,
                 **input.to_service_params(),
             )
@@ -54,5 +54,5 @@ class MealLogsMutation:
         info: AppInfo,
         id: int,
     ) -> None:
-        await info.context.meal_log_service.delete(id)
+        await info.context.services.meal_log_service.delete(id)
         await info.context.session.commit()
