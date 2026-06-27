@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database.models.meal_log import MealLog
 from ..exceptions import ObjectNotFound
-from .schemas import MealLogResponse
+from .schemas import MealLogSchema
 from .types import MealLogCreateParams, MealLogListFilters, MealLogUpdateParams
 
 
@@ -25,17 +25,17 @@ class MealLogService:
             return ObjectNotFound(message="User not found", id=user_id)
         return ObjectNotFound(message="Meal not found", id=meal_id)
 
-    async def get(self, id: int) -> MealLogResponse:
+    async def get(self, id: int) -> MealLogSchema:
         stmt = select(MealLog).where(MealLog.id == id)
         res = await self.session.execute(stmt)
         instance = res.scalar_one_or_none()
         if instance is None:
             raise ObjectNotFound(message="MealLog not found", id=id)
-        return MealLogResponse.model_validate(instance, from_attributes=True)
+        return MealLogSchema.model_validate(instance, from_attributes=True)
 
     async def get_list(
         self, limit: int = 10, offset: int = 0, **filters: Unpack[MealLogListFilters]
-    ) -> list[MealLogResponse]:
+    ) -> list[MealLogSchema]:
         stmt = select(MealLog).order_by(MealLog.created_at.desc())
 
         if date_filter := filters.get("date_filter"):
@@ -47,11 +47,11 @@ class MealLogService:
 
         res = await self.session.execute(stmt)
         return [
-            MealLogResponse.model_validate(instance, from_attributes=True)
+            MealLogSchema.model_validate(instance, from_attributes=True)
             for instance in res.scalars().all()
         ]
 
-    async def create(self, **values: Unpack[MealLogCreateParams]) -> MealLogResponse:
+    async def create(self, **values: Unpack[MealLogCreateParams]) -> MealLogSchema:
         stmt = insert(MealLog).values(**values).returning(MealLog)
         try:
             res = await self.session.execute(stmt)
@@ -61,11 +61,11 @@ class MealLogService:
                 user_id=values.get("user_id"),
                 meal_id=values.get("meal_id"),
             )
-        return MealLogResponse.model_validate(res.scalar_one(), from_attributes=True)
+        return MealLogSchema.model_validate(res.scalar_one(), from_attributes=True)
 
     async def update(
         self, id: int, **values: Unpack[MealLogUpdateParams]
-    ) -> MealLogResponse:
+    ) -> MealLogSchema:
         stmt = (
             update(MealLog).where(MealLog.id == id).values(**values).returning(MealLog)
         )
@@ -80,7 +80,7 @@ class MealLogService:
         instance = res.scalar_one_or_none()
         if instance is None:
             raise ObjectNotFound(message="MealLog not found", id=id)
-        return MealLogResponse.model_validate(instance, from_attributes=True)
+        return MealLogSchema.model_validate(instance, from_attributes=True)
 
     async def delete(self, id: int) -> None:
         stmt = delete(MealLog).where(MealLog.id == id)

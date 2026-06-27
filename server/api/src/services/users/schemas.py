@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 from .types import GENDER, GOAL
 
 
-class UserResponse(BaseModel):
+class UserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
