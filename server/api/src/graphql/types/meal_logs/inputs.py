@@ -3,7 +3,7 @@ from uuid import UUID
 
 import strawberry
 
-from ....services.meal_log.types import (
+from ....services.meal_logs.types import (
     MealLogCreateParams,
     MealLogListFilters,
     MealLogUpdateParams,

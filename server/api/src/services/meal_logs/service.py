@@ -5,7 +5,7 @@ from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...database.models.meal_log import MealLog
+from ...database.models.meal_logs import MealLog
 from ..exceptions import ObjectNotFound
 from .schemas import MealLogSchema
 from .types import MealLogCreateParams, MealLogListFilters, MealLogUpdateParams

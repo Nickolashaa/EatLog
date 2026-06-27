@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..services.meal_log.service import MealLogService
+from ..services.meal_logs.service import MealLogService
 from .session import get_session
 
 

@@ -4,7 +4,7 @@ from uuid import UUID
 
 import strawberry
 
-from ....services.meal_log.schemas import MealLogSchema
+from ....services.meal_logs.schemas import MealLogSchema
 
 
 @strawberry.type

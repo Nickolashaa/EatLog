@@ -5,11 +5,11 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry.fastapi import BaseContext
 
-from ..dependencies.meal_log import get_meal_log_service
+from ..dependencies.meal_logs import get_meal_log_service
 from ..dependencies.meals import get_meal_service
 from ..dependencies.session import get_session
 from ..dependencies.users import get_user_service
-from ..services.meal_log import MealLogService
+from ..services.meal_logs import MealLogService
 from ..services.meals import MealService
 from ..services.users import UserService
 

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from src.config import DATABASE_URL
 from src.database.connection import Base
-from src.database.models.meal_log import MealLog  # noqa: F401
+from src.database.models.meal_logs import MealLog  # noqa: F401
 from src.database.models.meals import Meal  # noqa: F401
 from src.database.models.users import User  # noqa: F401
 
