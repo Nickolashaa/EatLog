@@ -1,5 +1,6 @@
 import strawberry
 
+from .meals.mutations import MealsMutation
 from .meals.queries import MealsQuery
 from .users.mutations import UsersMutation
 from .users.queries import UsersQuery
@@ -16,6 +17,7 @@ class Query(
 @strawberry.type
 class Mutation(
     UsersMutation,
+    MealsMutation,
 ):
     pass
 
