@@ -34,4 +34,5 @@ class UsersMutation:
             await info.context.session.commit()
             return User.from_schema(instance)
         except ObjectNotFound as e:
+            await info.context.session.rollback()
             return ObjectNotFoundError.from_exception(e)
