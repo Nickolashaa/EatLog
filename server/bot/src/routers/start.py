@@ -4,7 +4,7 @@ from aiogram import Router
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.types import Message
 
-from ..graphql_client import (
+from ..graphql.client import (
     Client,
     GetUserByTelegramIdUserByTelegramIdUser,
     UpdateUserInput,

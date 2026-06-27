@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher
 
 from .config import API_URL, BOT_TOKEN
-from .graphql_client import Client
+from .graphql.client import Client
 from .routers import start
 
 bot = Bot(token=BOT_TOKEN)

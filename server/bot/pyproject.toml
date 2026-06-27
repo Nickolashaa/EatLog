@@ -16,7 +16,7 @@ select = ["E", "F", "I"]
 strict = true
 
 [[tool.mypy.overrides]]
-module = "src.graphql_client.*"
+module = "src.graphql.*"
 ignore_errors = true
 
 [dependency-groups]
@@ -28,7 +28,8 @@ dev = [
 [tool.ariadne-codegen]
 remote_schema_url = "http://api:5285/graphql"
 queries_path = "./src/graphql/"
-target_package_path = "./src/"
+target_package_path = "./src/graphql/"
+target_package_name = "client"
 
 [tool.ariadne-codegen.scalars.DateTime]
 type = "datetime.datetime"
