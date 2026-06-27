@@ -21,7 +21,7 @@ class MealLogService:
         user_id: UUID | None = None,
         meal_id: int | None = None,
     ) -> ObjectNotFound:
-        if "meal_logs_user_id_fk_key" in str(exc.orig).lower():
+        if "meal_logs_user_id_fkey" in str(exc.orig).lower():
             return ObjectNotFound(message="User not found", id=user_id)
         return ObjectNotFound(message="Meal not found", id=meal_id)
 
