@@ -1,6 +1,8 @@
+import html
 from uuid import UUID
 
 from aiogram import Router
+from aiogram.enums import ParseMode
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.types import Message
 
@@ -37,7 +39,11 @@ async def start(
         user = get_data.user_by_telegram_id
 
         if isinstance(user, GetUserByTelegramIdUserByTelegramIdUser):
-            await message.answer(f"Привет, {user.name}!")
+            await message.answer(
+                f"Привет, {html.escape(user.name)}!\n"
+                f"Вот твой UUID: <code>{user.id}</code>",
+                parse_mode=ParseMode.HTML,
+            )
             return
         await message.answer("Привет, незнакомец! Как ты сюда попал?)")
         return

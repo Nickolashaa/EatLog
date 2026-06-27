@@ -24,6 +24,7 @@ from ...utils.profile import get_uuid, profile_exists
 from ...utils.worker import Worker
 from ..header import Header
 from ..table_utils import btn_cell, make_table, readonly
+from ..toast import show_toast
 from .types import COLUMNS, FIXED_COLS
 
 
@@ -123,9 +124,13 @@ class MealLogTableWidget(QWidget):
             id=log.id,
             input=UpdateMealLogInput(grams=grams),
         )
-        self._save_worker.finished.connect(lambda _: self._load())
+        self._save_worker.finished.connect(self._on_saved)
         self._save_worker.failed.connect(self._on_error)
         self._save_worker.start()
+
+    def _on_saved(self, _: object) -> None:
+        self._load()
+        show_toast(self, "Изменения сохранены")
 
     def _on_delete(self, row: int) -> None:
         if row >= len(self._logs):
@@ -138,6 +143,7 @@ class MealLogTableWidget(QWidget):
     def _on_deleted(self, _: object) -> None:
         self._load()
         self.entry_deleted.emit()
+        show_toast(self, "Запись удалена")
 
     def _on_error(self, msg: str) -> None:
         QMessageBox.warning(self, "Ошибка", msg)

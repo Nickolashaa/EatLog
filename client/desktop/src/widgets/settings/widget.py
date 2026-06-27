@@ -32,6 +32,7 @@ from ..header import Header
 from ..profile_form import ProfileForm
 from ..profile_form.types import ProfileFormValues
 from ..spinner import Spinner
+from ..toast import show_toast
 from .types import KBZHU_ROWS
 
 
@@ -252,6 +253,7 @@ class SettingsWidget(QWidget):
         if self._user is not None:
             self._user.notification_time = notification_time
             self._user.hard_mod = hard_mod
+        show_toast(self, "Настройки уведомлений сохранены")
 
     def _on_notifications_error(self, msg: str) -> None:
         self.notifications_save_btn.setEnabled(True)
@@ -297,6 +299,7 @@ class SettingsWidget(QWidget):
             return
         self._user = user
         self._update_kbzhu(self._kbzhu(user))
+        show_toast(self, "Профиль обновлён")
 
     def _on_save_error(self, msg: str) -> None:
         self.profile_form.save_btn.setEnabled(True)

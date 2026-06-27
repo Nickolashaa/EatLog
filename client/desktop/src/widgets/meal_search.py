@@ -31,6 +31,7 @@ from ..utils.gql import client
 from ..utils.profile import get_uuid, profile_exists
 from ..utils.worker import Worker
 from .header import Header
+from .toast import show_toast
 
 
 class MealSearch(QWidget):
@@ -201,6 +202,7 @@ class MealSearch(QWidget):
                 return
             grams_widget.clear()
             self.meal_added.emit()
+            show_toast(self, f"«{meal.title}» добавлено в дневник")
 
         self._add_worker = Worker(
             client.create_meal_log,
@@ -236,6 +238,7 @@ class MealSearch(QWidget):
         if not isinstance(meal, CreateMealCreateMealMeal):
             self._on_error(meal.message)
             return
+        show_toast(self, f"Блюдо «{meal.title}» создано")
         self._search_timer.start()
 
     def _on_error(self, msg: str) -> None:

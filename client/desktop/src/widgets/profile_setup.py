@@ -1,7 +1,8 @@
 from typing import cast
 from uuid import UUID
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (
     QButtonGroup,
     QDialog,
@@ -15,6 +16,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from ..config import BOT_USERNAME
 from ..graphql.client import CreateUser, CreateUserInput, GetUser, GetUserUserUser
 from ..utils.gql import client
 from ..utils.profile import set_uuid
@@ -99,6 +101,10 @@ class ProfileSetupDialog(QDialog):
         self.uuid_input = QLineEdit()
         self.uuid_input.setPlaceholderText("xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
 
+        self.request_btn = QPushButton("Запросить UUID из Telegram")
+        self.request_btn.setObjectName("TelegramBtn")
+        self.request_btn.clicked.connect(self._on_request_uuid)
+
         self.login_btn = QPushButton("Войти")
         self.login_btn.clicked.connect(self._on_login)
 
@@ -108,11 +114,16 @@ class ProfileSetupDialog(QDialog):
         layout.addWidget(subtitle)
         layout.addSpacing(8)
         layout.addWidget(self.uuid_input)
+        layout.addWidget(self.request_btn)
         layout.addWidget(self.login_btn)
         return page
 
     def _on_switch(self, index: int) -> None:
         self.stack.setCurrentIndex(index)
+
+    def _on_request_uuid(self) -> None:
+        url = QUrl(f"https://t.me/{BOT_USERNAME}")
+        QDesktopServices.openUrl(url)
 
     def _on_login(self) -> None:
         text = self.uuid_input.text().strip()

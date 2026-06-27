@@ -448,6 +448,25 @@ QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0;
 }
+
+#ToastSuccess, #ToastError {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 22px;
+    border-radius: 10px;
+}
+
+#ToastSuccess {
+    background-color: $bg_elevated;
+    color: $success;
+    border: 1px solid $success;
+}
+
+#ToastError {
+    background-color: $bg_elevated;
+    color: $error;
+    border: 1px solid $error;
+}
 """
 )
 
