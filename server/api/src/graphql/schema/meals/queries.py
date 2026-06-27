@@ -14,7 +14,7 @@ class MealsQuery:
     async def meals(
         self,
         info: AppInfo,
-        filter: MealFilters,
+        filter: MealFilters | None = None,
         limit: int = DEFAULT_LIMIT,
         offset: int = DEFAULT_OFFSET,
     ) -> list[Meal]:
@@ -23,6 +23,6 @@ class MealsQuery:
             for instance in await info.context.meal_service.get_list(
                 limit=limit,
                 offset=offset,
-                **filter.to_service_params(),
+                **filter.to_service_params() if filter is not None else {},
             )
         ]
