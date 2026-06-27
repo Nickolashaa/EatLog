@@ -4,7 +4,7 @@
 from typing import Any, Optional, Union
 from uuid import UUID
 
-from .async_base_client import AsyncBaseClient
+from .base_client import BaseClient
 from .base_model import UNSET, UnsetType
 from .create_meal import CreateMeal
 from .create_meal_log import CreateMealLog
@@ -30,8 +30,8 @@ def gql(q: str) -> str:
     return q
 
 
-class Client(AsyncBaseClient):
-    async def create_meal_log(
+class Client(BaseClient):
+    def create_meal_log(
         self, input: CreateMealLogInput, **kwargs: Any
     ) -> CreateMealLog:
         query = gql("""
@@ -83,26 +83,26 @@ class Client(AsyncBaseClient):
             }
             """)
         variables: dict[str, object] = {"input": input}
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="CreateMealLog", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateMealLog.model_validate(data)
 
-    async def delete_meal_log(self, id: int, **kwargs: Any) -> DeleteMealLog:
+    def delete_meal_log(self, id: int, **kwargs: Any) -> DeleteMealLog:
         query = gql("""
             mutation DeleteMealLog($id: Int!) {
               deleteMealLog(id: $id)
             }
             """)
         variables: dict[str, object] = {"id": id}
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="DeleteMealLog", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteMealLog.model_validate(data)
 
-    async def update_meal_log(
+    def update_meal_log(
         self, id: int, input: UpdateMealLogInput, **kwargs: Any
     ) -> UpdateMealLog:
         query = gql("""
@@ -154,13 +154,13 @@ class Client(AsyncBaseClient):
             }
             """)
         variables: dict[str, object] = {"id": id, "input": input}
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="UpdateMealLog", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return UpdateMealLog.model_validate(data)
 
-    async def create_meal(self, input: CreateMealInput, **kwargs: Any) -> CreateMeal:
+    def create_meal(self, input: CreateMealInput, **kwargs: Any) -> CreateMeal:
         query = gql("""
             mutation CreateMeal($input: CreateMealInput!) {
               createMeal(input: $input) {
@@ -184,13 +184,13 @@ class Client(AsyncBaseClient):
             }
             """)
         variables: dict[str, object] = {"input": input}
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="CreateMeal", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateMeal.model_validate(data)
 
-    async def create_user(self, input: CreateUserInput, **kwargs: Any) -> CreateUser:
+    def create_user(self, input: CreateUserInput, **kwargs: Any) -> CreateUser:
         query = gql("""
             mutation CreateUser($input: CreateUserInput!) {
               createUser(input: $input) {
@@ -212,13 +212,13 @@ class Client(AsyncBaseClient):
             }
             """)
         variables: dict[str, object] = {"input": input}
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="CreateUser", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateUser.model_validate(data)
 
-    async def update_user(
+    def update_user(
         self, id: UUID, input: UpdateUserInput, **kwargs: Any
     ) -> UpdateUser:
         query = gql("""
@@ -248,13 +248,13 @@ class Client(AsyncBaseClient):
             }
             """)
         variables: dict[str, object] = {"id": id, "input": input}
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="UpdateUser", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return UpdateUser.model_validate(data)
 
-    async def meal_logs(
+    def meal_logs(
         self,
         filter_: Union[Optional[MealLogFilter], UnsetType] = UNSET,
         limit: Union[Optional[int], UnsetType] = UNSET,
@@ -308,13 +308,13 @@ class Client(AsyncBaseClient):
             "limit": limit,
             "offset": offset,
         }
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="MealLogs", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return MealLogs.model_validate(data)
 
-    async def meals(
+    def meals(
         self,
         filter_: Union[Optional[MealFilters], UnsetType] = UNSET,
         limit: Union[Optional[int], UnsetType] = UNSET,
@@ -342,13 +342,13 @@ class Client(AsyncBaseClient):
             "limit": limit,
             "offset": offset,
         }
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="Meals", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return Meals.model_validate(data)
 
-    async def get_user(self, id: UUID, **kwargs: Any) -> GetUser:
+    def get_user(self, id: UUID, **kwargs: Any) -> GetUser:
         query = gql("""
             query GetUser($id: UUID!) {
               user(id: $id) {
@@ -376,7 +376,7 @@ class Client(AsyncBaseClient):
             }
             """)
         variables: dict[str, object] = {"id": id}
-        response = await self.execute(
+        response = self.execute(
             query=query, operation_name="GetUser", variables=variables, **kwargs
         )
         data = self.get_data(response)
