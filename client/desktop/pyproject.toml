@@ -26,6 +26,7 @@ remote_schema_url = "http://localhost:5285/graphql"
 queries_path = "./src/graphql/"
 target_package_path = "./src/graphql/"
 target_package_name = "client"
+async_client = false
 
 [tool.ariadne-codegen.scalars.DateTime]
 type = "datetime.datetime"
