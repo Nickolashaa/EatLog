@@ -8,11 +8,13 @@ from .async_base_client import AsyncBaseClient
 from .base_model import UNSET, UnsetType
 from .create_meal import CreateMeal
 from .create_meal_log import CreateMealLog
+from .create_user import CreateUser
 from .delete_meal_log import DeleteMealLog
 from .get_user import GetUser
 from .input_types import (
     CreateMealInput,
     CreateMealLogInput,
+    CreateUserInput,
     MealFilters,
     MealLogFilter,
     UpdateMealLogInput,
@@ -187,6 +189,34 @@ class Client(AsyncBaseClient):
         )
         data = self.get_data(response)
         return CreateMeal.model_validate(data)
+
+    async def create_user(self, input: CreateUserInput, **kwargs: Any) -> CreateUser:
+        query = gql("""
+            mutation CreateUser($input: CreateUserInput!) {
+              createUser(input: $input) {
+                ...UserFields
+              }
+            }
+
+            fragment UserFields on User {
+              id
+              name
+              telegramId
+              gender
+              weight
+              height
+              age
+              goal
+              notificationTime
+              hardMod
+            }
+            """)
+        variables: dict[str, object] = {"input": input}
+        response = await self.execute(
+            query=query, operation_name="CreateUser", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateUser.model_validate(data)
 
     async def update_user(
         self, id: UUID, input: UpdateUserInput, **kwargs: Any

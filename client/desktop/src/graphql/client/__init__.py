@@ -13,6 +13,7 @@ from .create_meal_log import (
     CreateMealLogCreateMealLogMealLog,
     CreateMealLogCreateMealLogObjectNotFoundError,
 )
+from .create_user import CreateUser, CreateUserCreateUser
 from .delete_meal_log import DeleteMealLog
 from .enums import Gender, Goal
 from .exceptions import (
@@ -64,6 +65,8 @@ __all__ = [
     "CreateMealLogCreateMealLogMealLog",
     "CreateMealLogCreateMealLogObjectNotFoundError",
     "CreateMealLogInput",
+    "CreateUser",
+    "CreateUserCreateUser",
     "CreateUserInput",
     "DeleteMealLog",
     "Gender",
