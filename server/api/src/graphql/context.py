@@ -5,8 +5,10 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry.fastapi import BaseContext
 
+from ..dependencies.meals import get_meal_service
 from ..dependencies.session import get_session
 from ..dependencies.users import get_user_service
+from ..services.meals import MealService
 from ..services.users import UserService
 
 
@@ -14,15 +16,18 @@ from ..services.users import UserService
 class Context(BaseContext):
     session: AsyncSession
     user_service: UserService
+    meal_service: MealService
 
 
 async def context_getter(
     session: AsyncSession = Depends(get_session),
     user_service: UserService = Depends(get_user_service),
+    meal_service: MealService = Depends(get_meal_service),
 ) -> Context:
     return Context(
         session=session,
         user_service=user_service,
+        meal_service=meal_service,
     )
 
 
