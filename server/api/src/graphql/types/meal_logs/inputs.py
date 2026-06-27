@@ -41,7 +41,7 @@ class UpdateMealLogInput:
         return params
 
 
-@strawberry.type
+@strawberry.input
 class MealLogFilter:
     user_id: strawberry.Maybe[UUID]
     date_filter: strawberry.Maybe[date]
