@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ...database.models.users import User
 from ..exceptions import ObjectNotFound
 from .schemas import UserSchema
-from .types import UserCreateParams, UserUpdateParams
+from .types import UserCreateParams, UserListFilters, UserUpdateParams
 
 
 class UserService:
@@ -21,6 +21,22 @@ class UserService:
         if instance is None:
             raise ObjectNotFound(message="User not found", id=id)
         return UserSchema.model_validate(instance, from_attributes=True)
+
+    async def get_list(
+        self,
+        **filters: Unpack[UserListFilters],
+    ) -> list[UserSchema]:
+        stmt = select(User)
+
+        if ids := filters.get("ids"):
+            stmt = stmt.where(User.id.in_(ids))
+
+        res = await self.session.execute(stmt)
+
+        return [
+            UserSchema.model_validate(instance, from_attributes=True)
+            for instance in res.scalars().all()
+        ]
 
     async def get_by_telegram_id(self, telegram_id: str) -> UserSchema:
         stmt = select(User).where(User.telegram_id == telegram_id)

@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Literal, NotRequired, Required, TypedDict
+from uuid import UUID
 
 type GENDER = Literal["MALE", "FEMALE"]
 type GOAL = Literal["MAINTAIN", "LOSE", "GAIN"]
@@ -27,3 +28,7 @@ class UserUpdateParams(TypedDict):
     goal: NotRequired[GOAL]
     notification_time: NotRequired[datetime | None]
     hard_mod: NotRequired[bool]
+
+
+class UserListFilters(TypedDict):
+    ids: NotRequired[list[UUID]]

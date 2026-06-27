@@ -26,7 +26,10 @@ class MealLogService:
         return ObjectNotFound(message="Meal not found", id=meal_id)
 
     async def get_list(
-        self, limit: int, offset: int, **filters: Unpack[MealLogListFilters]
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        **filters: Unpack[MealLogListFilters],
     ) -> list[MealLogSchema]:
         stmt = select(MealLog).order_by(MealLog.created_at.desc())
 

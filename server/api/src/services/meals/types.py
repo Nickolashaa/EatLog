@@ -3,6 +3,7 @@ from typing import NotRequired, Required, TypedDict
 
 class MealListFilters(TypedDict):
     search_query: NotRequired[str]
+    ids: NotRequired[list[int]]
 
 
 class MealCreateParams(TypedDict):

@@ -15,7 +15,10 @@ class MealService:
         self.session = session
 
     async def get_list(
-        self, limit: int, offset: int, **filters: Unpack[MealListFilters]
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        **filters: Unpack[MealListFilters],
     ) -> list[MealSchema]:
         stmt = select(Meal).order_by(Meal.title)
         if search_query := filters.get("search_query"):
@@ -27,6 +30,8 @@ class MealService:
                     Meal.title.icontains(search_query.capitalize()),
                 )
             )
+        if ids := filters.get("ids"):
+            stmt = stmt.where(Meal.id.in_(ids))
 
         stmt = stmt.offset(offset).limit(limit)
 
