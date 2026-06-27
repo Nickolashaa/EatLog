@@ -4,7 +4,7 @@ from uuid import UUID
 
 import strawberry
 
-from ....services.users.schemas import UserResponse
+from ....services.users.schemas import UserSchema
 from .enums import Gender, Goal
 
 
@@ -24,7 +24,7 @@ class User:
     hard_mod: bool
 
     @classmethod
-    def from_schema(cls, instance: UserResponse) -> Self:
+    def from_schema(cls, instance: UserSchema) -> Self:
         return cls(
             id=instance.id,
             name=instance.name,
