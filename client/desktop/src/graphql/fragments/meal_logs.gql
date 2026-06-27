@@ -1,0 +1,12 @@
+fragment MealLogFields on MealLog {
+    id
+    grams
+    createdAt
+    updatedAt
+    user {
+        ...UserFields
+    }
+    meal {
+        ...MealFields
+    }
+}

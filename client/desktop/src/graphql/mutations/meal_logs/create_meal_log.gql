@@ -1,0 +1,10 @@
+mutation CreateMealLog($input: CreateMealLogInput!) {
+    createMealLog(input: $input) {
+        ... on MealLog {
+            ...MealLogFields
+        }
+        ... on ObjectNotFoundError {
+            message
+        }
+    }
+}

@@ -1,0 +1,12 @@
+fragment UserFields on User {
+    id
+    name
+    telegramId
+    gender
+    weight
+    height
+    age
+    goal
+    notificationTime
+    hardMod
+}

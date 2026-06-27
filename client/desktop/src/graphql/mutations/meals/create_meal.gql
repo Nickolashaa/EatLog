@@ -1,0 +1,10 @@
+mutation CreateMeal($input: CreateMealInput!) {
+    createMeal(input: $input) {
+        ... on Meal {
+            ...MealFields
+        }
+        ... on ObjectAlreadyExistsError {
+            message
+        }
+    }
+}

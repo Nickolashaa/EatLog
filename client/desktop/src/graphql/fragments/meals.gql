@@ -1,0 +1,8 @@
+fragment MealFields on Meal {
+    id
+    title
+    calories
+    protein
+    fat
+    carbohydrate
+}

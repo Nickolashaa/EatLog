@@ -1,0 +1,10 @@
+mutation UpdateMealLog($id: Int!, $input: UpdateMealLogInput!) {
+    updateMealLog(id: $id, input: $input) {
+        ... on MealLog {
+            ...MealLogFields
+        }
+        ... on ObjectNotFoundError {
+            message
+        }
+    }
+}
