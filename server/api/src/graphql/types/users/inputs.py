@@ -18,7 +18,7 @@ class CreateUserInput:
     notification_time: datetime | None = None
     hard_mod: bool = False
 
-    def to_create_params(self) -> UserCreateParams:
+    def to_service_params(self) -> UserCreateParams:
         return UserCreateParams(
             name=self.name,
             telegram_id=self.telegram_id,
@@ -44,7 +44,7 @@ class UpdateUserInput:
     notification_time: strawberry.Maybe[datetime | None]
     hard_mod: strawberry.Maybe[bool]
 
-    def to_update_params(self) -> UserUpdateParams:
+    def to_service_params(self) -> UserUpdateParams:
         params: UserUpdateParams = {}
         if self.name is not None:
             params["name"] = self.name.value
