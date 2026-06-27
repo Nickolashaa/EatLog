@@ -15,7 +15,7 @@ class MealService:
         self.session = session
 
     async def get_list(
-        self, limit: int = 10, offset: int = 0, **filters: Unpack[MealListFilters]
+        self, limit: int, offset: int, **filters: Unpack[MealListFilters]
     ) -> list[MealSchema]:
         stmt = select(Meal).order_by(Meal.title)
         if search_query := filters.get("search_query"):
