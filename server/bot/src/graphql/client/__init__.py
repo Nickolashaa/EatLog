@@ -17,7 +17,15 @@ from .get_user_by_telegram_id import (
     GetUserByTelegramIdUserByTelegramIdObjectNotFoundError,
     GetUserByTelegramIdUserByTelegramIdUser,
 )
-from .input_types import CreateUserInput, UpdateUserInput
+from .input_types import (
+    CreateMealInput,
+    CreateMealLogInput,
+    CreateUserInput,
+    MealFilters,
+    MealLogFilter,
+    UpdateMealLogInput,
+    UpdateUserInput,
+)
 from .update_user import (
     UpdateUser,
     UpdateUserUpdateUserObjectNotFoundError,
@@ -28,6 +36,8 @@ __all__ = [
     "AsyncBaseClient",
     "BaseModel",
     "Client",
+    "CreateMealInput",
+    "CreateMealLogInput",
     "CreateUserInput",
     "Gender",
     "GetUserByTelegramId",
@@ -39,6 +49,9 @@ __all__ = [
     "GraphQLClientGraphQLMultiError",
     "GraphQLClientHttpError",
     "GraphQLClientInvalidResponseError",
+    "MealFilters",
+    "MealLogFilter",
+    "UpdateMealLogInput",
     "UpdateUser",
     "UpdateUserInput",
     "UpdateUserUpdateUserObjectNotFoundError",

@@ -2,12 +2,22 @@
 # Source: http://api:5285/graphql
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
+from uuid import UUID
 
 from pydantic import Field
 
 from .base_model import BaseModel
 from .enums import Gender, Goal
+
+
+class MealFilters(BaseModel):
+    search_query: Optional[str] = Field(alias="searchQuery", default=None)
+
+
+class MealLogFilter(BaseModel):
+    user_id: Optional[UUID] = Field(alias="userId", default=None)
+    date_filter: Optional[Any] = Field(alias="dateFilter", default=None)
 
 
 class CreateUserInput(BaseModel):
@@ -36,3 +46,23 @@ class UpdateUserInput(BaseModel):
         alias="notificationTime", default=None
     )
     hard_mod: Optional[bool] = Field(alias="hardMod", default=None)
+
+
+class CreateMealInput(BaseModel):
+    title: str
+    calories: float
+    protein: float
+    fat: float
+    carbohydrate: float
+
+
+class CreateMealLogInput(BaseModel):
+    user_id: UUID = Field(alias="userId")
+    meal_id: int = Field(alias="mealId")
+    grams: float
+
+
+class UpdateMealLogInput(BaseModel):
+    user_id: Optional[UUID] = Field(alias="userId", default=None)
+    meal_id: Optional[int] = Field(alias="mealId", default=None)
+    grams: Optional[float] = None

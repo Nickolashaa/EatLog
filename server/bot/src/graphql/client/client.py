@@ -54,14 +54,20 @@ class Client(AsyncBaseClient):
               userByTelegramId(telegramId: $telegramId) {
                 __typename
                 ... on User {
-                  id
-                  name
-                  telegramId
+                  ...UserFields
                 }
                 ... on ObjectNotFoundError {
                   message
                 }
               }
+            }
+
+            fragment UserFields on User {
+              id
+              name
+              telegramId
+              notificationTime
+              hardMod
             }
             """)
         variables: dict[str, object] = {"telegramId": telegram_id}

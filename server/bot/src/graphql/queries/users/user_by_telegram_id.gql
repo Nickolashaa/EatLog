@@ -4,9 +4,7 @@ query GetUserByTelegramId($telegramId: String!){
   )
   {
     ... on User {
-      id
-      name
-      telegramId
+      ...UserFields
     }
     ... on ObjectNotFoundError {
       message
