@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import cast
+from uuid import UUID
 
 from PyQt6.QtCore import Qt, QTime, QTimer, QUrl
 from PyQt6.QtGui import QDesktopServices, QHideEvent, QShowEvent
@@ -16,11 +17,20 @@ from PyQt6.QtWidgets import (
 )
 
 from ...config import BOT_USERNAME
-from ...services.profile import Kbzhu, Profile, ProfileBase, ProfileService
-from ...services.users import UserApiService
+from ...graphql.client import (
+    GetUser,
+    GetUserUserUser,
+    UpdateUser,
+    UpdateUserInput,
+    UpdateUserUpdateUserUser,
+    UserFields,
+)
+from ...utils.gql import client
+from ...utils.profile import Kbzhu, calculate_kbzhu, get_uuid, profile_exists
 from ...utils.worker import Worker
 from ..header import Header
 from ..profile_form import ProfileForm
+from ..profile_form.types import ProfileFormValues
 from ..spinner import Spinner
 from .types import KBZHU_ROWS
 
@@ -31,7 +41,7 @@ class SettingsWidget(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self._val_labels: dict[str, QLabel] = {}
         self._telegram_linked = False
-        self._profile: Profile | None = None
+        self._user: UserFields | None = None
         self._init_ui()
         self._try_load_profile()
         self._telegram_timer = QTimer(self)
@@ -104,7 +114,7 @@ class SettingsWidget(QWidget):
         self.notification_time_edit.setMaximumWidth(130)
         self.notification_time_edit.hide()
 
-        self.hard_mod_check = QCheckBox("Строгий режим")
+        self.hard_mod_check = QCheckBox("Режим повышенной жестокости")
         self.hard_mod_check.hide()
 
         self.notifications_save_btn = QPushButton("Сохранить")
@@ -172,54 +182,62 @@ class SettingsWidget(QWidget):
         self.setObjectName("SettingsWidget")
 
     def _try_load_profile(self) -> None:
-        if not ProfileService.exists():
+        if not profile_exists():
             return
-        self._profile_worker = Worker(ProfileService.load)
+        self._profile_worker = Worker(client.get_user, UUID(get_uuid()))
         self._profile_worker.finished.connect(self._on_profile_loaded)
         self._profile_worker.start()
 
-    def _on_profile_loaded(self, profile: object) -> None:
-        p = cast(Profile, profile)
-        self._profile = p
-        self.profile_form.load(p)
-        self._update_kbzhu(ProfileService.calculate(p))
-        self._load_notifications(p)
+    def _on_profile_loaded(self, result: object) -> None:
+        user = cast(GetUser, result).user
+        if not isinstance(user, GetUserUserUser):
+            return
+        self._user = user
+        self.profile_form.load(user)
+        self._update_kbzhu(self._kbzhu(user))
+        self._load_notifications(user)
 
-    def _load_notifications(self, profile: Profile) -> None:
-        nt = profile["notification_time"]
+    def _kbzhu(self, user: UserFields) -> Kbzhu:
+        return calculate_kbzhu(
+            gender=user.gender,
+            weight=user.weight,
+            height=user.height,
+            age=user.age,
+            goal=user.goal,
+        )
+
+    def _load_notifications(self, user: UserFields) -> None:
+        nt = user.notification_time
         if nt:
-            local = datetime.fromisoformat(nt).astimezone()
+            local = nt.astimezone()
             self.notification_time_edit.setTime(QTime(local.hour, local.minute))
         self.notifications_check.setChecked(nt is not None)
         self.notification_time_edit.setVisible(nt is not None)
         self.hard_mod_check.setVisible(nt is not None)
-        self.hard_mod_check.setChecked(profile["hard_mod"])
+        self.hard_mod_check.setChecked(user.hard_mod)
 
     def _on_notifications_toggled(self, checked: bool) -> None:
         self.notification_time_edit.setVisible(checked)
         self.hard_mod_check.setVisible(checked)
 
     def _on_save_notifications(self) -> None:
-        if not ProfileService.exists():
+        if not profile_exists():
             return
         if self.notifications_check.isChecked():
             t = self.notification_time_edit.time()
-            local = (
+            notification_time: datetime | None = (
                 datetime.now()
                 .astimezone()
                 .replace(hour=t.hour(), minute=t.minute(), second=0, microsecond=0)
             )
-            notification_time: str | None = local.isoformat()
         else:
             notification_time = None
         hard_mod = self.hard_mod_check.isChecked()
-        uuid = ProfileService.uuid()
         self.notifications_save_btn.setEnabled(False)
         self._notifications_worker = Worker(
-            UserApiService.update_notifications,
-            uuid=uuid,
-            notification_time=notification_time,
-            hard_mod=hard_mod,
+            client.update_user,
+            id=UUID(get_uuid()),
+            input=UpdateUserInput(notificationTime=notification_time, hardMod=hard_mod),
         )
         self._notifications_worker.finished.connect(
             lambda _: self._finish_notifications_save(notification_time, hard_mod)
@@ -228,13 +246,12 @@ class SettingsWidget(QWidget):
         self._notifications_worker.start()
 
     def _finish_notifications_save(
-        self, notification_time: str | None, hard_mod: bool
+        self, notification_time: datetime | None, hard_mod: bool
     ) -> None:
         self.notifications_save_btn.setEnabled(True)
-        if self._profile is not None:
-            self._profile["notification_time"] = notification_time
-            self._profile["hard_mod"] = hard_mod
-            ProfileService.set_cache(self._profile)
+        if self._user is not None:
+            self._user.notification_time = notification_time
+            self._user.hard_mod = hard_mod
 
     def _on_notifications_error(self, msg: str) -> None:
         self.notifications_save_btn.setEnabled(True)
@@ -252,48 +269,49 @@ class SettingsWidget(QWidget):
         self.telegram_spinner.stop()
 
     def _on_profile_saved(self, profile: object) -> None:
-        p = cast(ProfileBase, profile)
-        if not ProfileService.exists():
+        values = cast(ProfileFormValues, profile)
+        if not profile_exists():
             return
-        uuid = ProfileService.uuid()
         self.profile_form.save_btn.setEnabled(False)
-        self._worker = Worker(UserApiService.update_profile, uuid=uuid, profile=p)
-        self._worker.finished.connect(lambda _: self._finish_save(p, uuid))
+        self._worker = Worker(
+            client.update_user,
+            id=UUID(get_uuid()),
+            input=UpdateUserInput(
+                name=values["name"],
+                gender=values["gender"],
+                weight=values["weight"],
+                height=values["height"],
+                age=values["age"],
+                goal=values["goal"],
+            ),
+        )
+        self._worker.finished.connect(self._finish_save)
         self._worker.failed.connect(self._on_save_error)
         self._worker.start()
 
-    def _finish_save(self, base: ProfileBase, uuid: str) -> None:
-        prev = self._profile
-        full: Profile = {
-            "uuid": uuid,
-            "name": base["name"],
-            "gender": base["gender"],
-            "weight": base["weight"],
-            "height": base["height"],
-            "age": base["age"],
-            "goal": base["goal"],
-            "notification_time": prev["notification_time"] if prev else None,
-            "hard_mod": prev["hard_mod"] if prev else False,
-        }
-        self._profile = full
-        ProfileService.set_cache(full)
+    def _finish_save(self, result: object) -> None:
         self.profile_form.save_btn.setEnabled(True)
-        self._update_kbzhu(ProfileService.calculate(full))
+        user = cast(UpdateUser, result).update_user
+        if not isinstance(user, UpdateUserUpdateUserUser):
+            self._on_save_error(user.message)
+            return
+        self._user = user
+        self._update_kbzhu(self._kbzhu(user))
 
     def _on_save_error(self, msg: str) -> None:
         self.profile_form.save_btn.setEnabled(True)
         QMessageBox.warning(self, "Ошибка", f"Не удалось обновить профиль:\n{msg}")
 
     def _on_link_telegram(self) -> None:
-        if not ProfileService.exists():
+        if not profile_exists():
             QMessageBox.warning(
                 self,
                 "Профиль не найден",
                 "Сначала заполните профиль, чтобы привязать Telegram.",
             )
             return
-        uuid = ProfileService.uuid()
-        url = QUrl(f"https://t.me/{BOT_USERNAME}?start=reg_{uuid}")
+        uuid = get_uuid()
+        url = QUrl(f"https://t.me/{BOT_USERNAME}?start={uuid}")
         QDesktopServices.openUrl(url)
         if not self._telegram_timer.isActive():
             self._telegram_timer.start()
@@ -316,16 +334,16 @@ class SettingsWidget(QWidget):
             self._telegram_timer.stop()
 
     def _sync_telegram(self) -> None:
-        if self._telegram_linked or not ProfileService.exists():
+        if self._telegram_linked or not profile_exists():
             self._telegram_timer.stop()
             return
-        uuid = ProfileService.uuid()
-        self._telegram_worker = Worker(UserApiService.get_telegram_id, uuid)
+        self._telegram_worker = Worker(client.get_user, UUID(get_uuid()))
         self._telegram_worker.finished.connect(self._on_telegram_checked)
         self._telegram_worker.start()
 
-    def _on_telegram_checked(self, telegram_id: object) -> None:
-        if telegram_id is None:
+    def _on_telegram_checked(self, result: object) -> None:
+        user = cast(GetUser, result).user
+        if not isinstance(user, GetUserUserUser) or user.telegram_id is None:
             return
         self._telegram_linked = True
         self._refresh_telegram_ui()

@@ -15,6 +15,10 @@ select = ["E", "F", "I"]
 [tool.mypy]
 strict = true
 
+[[tool.mypy.overrides]]
+module = "src.graphql.*"
+ignore_errors = true
+
 [dependency-groups]
 dev = [
     "mypy>=1.20.2",

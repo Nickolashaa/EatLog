@@ -1,4 +1,5 @@
 from typing import cast
+from uuid import UUID
 
 from PyQt6.QtCore import QLocale, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QDoubleValidator
@@ -15,9 +16,19 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..services.meal_log import MealLogApiService
-from ..services.meals import MealApiService, MealData, MealInput
-from ..services.profile import ProfileService
+from ..graphql.client import (
+    CreateMeal,
+    CreateMealCreateMealMeal,
+    CreateMealInput,
+    CreateMealLog,
+    CreateMealLogCreateMealLogMealLog,
+    CreateMealLogInput,
+    MealFilters,
+    Meals,
+    MealsMeals,
+)
+from ..utils.gql import client
+from ..utils.profile import get_uuid, profile_exists
 from ..utils.worker import Worker
 from .header import Header
 
@@ -28,7 +39,7 @@ class MealSearch(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self._meals: list[MealData] = []
+        self._meals: list[MealsMeals] = []
         self._search_seq = 0
         self._init_ui()
 
@@ -126,7 +137,9 @@ class MealSearch(QWidget):
 
         self._search_seq += 1
         seq = self._search_seq
-        self._search_worker = Worker(MealApiService.get_list, search=query, limit=5)
+        self._search_worker = Worker(
+            client.meals, filter_=MealFilters(searchQuery=query), limit=5
+        )
         self._search_worker.finished.connect(
             lambda data: self._on_search_result(seq, query, data)
         )
@@ -136,7 +149,7 @@ class MealSearch(QWidget):
     def _on_search_result(self, seq: int, query: str, data: object) -> None:
         if seq != self._search_seq:
             return
-        meals = cast(list[MealData], data)
+        meals = cast(Meals, data).meals
         if meals:
             self._no_results_section.hide()
             self._populate_table(meals)
@@ -145,12 +158,12 @@ class MealSearch(QWidget):
             self._create_title.setText(query)
             self._no_results_section.show()
 
-    def _populate_table(self, meals: list[MealData]) -> None:
+    def _populate_table(self, meals: list[MealsMeals]) -> None:
         self._meals = meals
         self.table.setRowCount(len(meals))
 
         for row, meal in enumerate(meals):
-            title_item = QTableWidgetItem(meal["title"])
+            title_item = QTableWidgetItem(meal.title)
             self.table.setItem(row, 0, title_item)
 
             grams_input = QLineEdit()
@@ -178,20 +191,20 @@ class MealSearch(QWidget):
         grams_text = grams_widget.text().strip().replace(",", ".")
         grams = float(grams_text) if grams_text else 100.0
 
-        if not ProfileService.exists():
+        if not profile_exists():
             return
 
-        user_id = ProfileService.uuid()
-
-        def on_added(_: object) -> None:
+        def on_added(result: object) -> None:
+            log = cast(CreateMealLog, result).create_meal_log
+            if not isinstance(log, CreateMealLogCreateMealLogMealLog):
+                self._on_error(log.message)
+                return
             grams_widget.clear()
             self.meal_added.emit()
 
         self._add_worker = Worker(
-            MealLogApiService.create,
-            user_id=user_id,
-            meal_id=meal["id"],
-            grams=grams,
+            client.create_meal_log,
+            CreateMealLogInput(userId=UUID(get_uuid()), mealId=meal.id, grams=grams),
         )
         self._add_worker.finished.connect(on_added)
         self._add_worker.failed.connect(self._on_error)
@@ -205,18 +218,25 @@ class MealSearch(QWidget):
         def parse(field: QLineEdit) -> float:
             return float(field.text().strip().replace(",", ".") or "0")
 
-        data: MealInput = {
-            "title": title,
-            "calories": parse(self._create_calories),
-            "protein": parse(self._create_protein),
-            "fat": parse(self._create_fat),
-            "carbohydrate": parse(self._create_carbohydrate),
-        }
+        input_ = CreateMealInput(
+            title=title,
+            calories=parse(self._create_calories),
+            protein=parse(self._create_protein),
+            fat=parse(self._create_fat),
+            carbohydrate=parse(self._create_carbohydrate),
+        )
 
-        self._create_worker = Worker(MealApiService.create, **data)
-        self._create_worker.finished.connect(lambda _: self._search_timer.start())
+        self._create_worker = Worker(client.create_meal, input_)
+        self._create_worker.finished.connect(self._on_created)
         self._create_worker.failed.connect(self._on_error)
         self._create_worker.start()
+
+    def _on_created(self, result: object) -> None:
+        meal = cast(CreateMeal, result).create_meal
+        if not isinstance(meal, CreateMealCreateMealMeal):
+            self._on_error(meal.message)
+            return
+        self._search_timer.start()
 
     def _on_error(self, msg: str) -> None:
         QMessageBox.warning(self, "Ошибка", msg)
