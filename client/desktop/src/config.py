@@ -1,11 +1,23 @@
+import sys
+from pathlib import Path
+
+
+def resource_path(name: str) -> str:
+    base = getattr(sys, "_MEIPASS", None)
+    root = Path(base) if base else Path(__file__).resolve().parent
+    return str(root / name)
+
+
 API_URL = "http://api.eat-log.ru"
 BOT_USERNAME = "eat_log_bot"
 
 WIDTH = 1280
 HEIGHT = 720
 TITLE = "🥪 EAT LOG 🥪"
+ICON_PATH = resource_path("assets/favicon.ico")
 
-QSS_COLORS = {
+# Catppuccin Mocha
+QSS_COLORS_DARK = {
     "bg": "#1e1e2e",
     "bg_secondary": "#181825",
     "bg_elevated": "#313244",
@@ -21,3 +33,28 @@ QSS_COLORS = {
     "warning": "#f9e2af",
     "error": "#f38ba8",
 }
+
+# Catppuccin Latte
+QSS_COLORS_LIGHT = {
+    "bg": "#eff1f5",
+    "bg_secondary": "#e6e9ef",
+    "bg_elevated": "#ccd0da",
+    "border": "#bcc0cc",
+    "border_focus": "#8839ef",
+    "text": "#4c4f69",
+    "text_muted": "#6c6f85",
+    "text_disabled": "#9ca0b0",
+    "primary": "#8839ef",
+    "secondary": "#1e66f5",
+    "secondary_hover": "#04a5e5",
+    "success": "#40a02b",
+    "warning": "#df8e1d",
+    "error": "#d20f39",
+}
+
+THEMES = {
+    "dark": QSS_COLORS_DARK,
+    "light": QSS_COLORS_LIGHT,
+}
+
+QSS_COLORS = QSS_COLORS_DARK

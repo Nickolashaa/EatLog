@@ -1,6 +1,7 @@
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QTabWidget, QWidget
 
-from ..config import HEIGHT, TITLE, WIDTH
+from ..config import HEIGHT, ICON_PATH, TITLE, WIDTH
 from .daily_report import DailyReport
 from .meal_log_table import MealLogTableWidget
 from .meal_search import MealSearch
@@ -13,6 +14,7 @@ class EatLogWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle(TITLE)
+        self.setWindowIcon(QIcon(ICON_PATH))
         self.resize(WIDTH, HEIGHT)
 
         meal_search = MealSearch()
@@ -33,9 +35,13 @@ class EatLogWindow(QMainWindow):
         meal_log_table.entry_deleted.connect(daily_report.refresh)
 
         self.tabs = QTabWidget()
-        self.tabs.addTab(home_widget, "Главная")
-        self.tabs.addTab(meal_table, "Блюда")
-        self.tabs.addTab(meal_log_table, "Журнал")
-        self.tabs.addTab(SettingsWidget(), "Настройки")
+        self.tabs.setDocumentMode(True)
+        tab_bar = self.tabs.tabBar()
+        if tab_bar is not None:
+            tab_bar.setExpanding(True)
+        self.tabs.addTab(home_widget, "🏠  Главная")
+        self.tabs.addTab(meal_table, "🍽  Блюда")
+        self.tabs.addTab(meal_log_table, "📖  Журнал")
+        self.tabs.addTab(SettingsWidget(), "⚙  Настройки")
 
         self.setCentralWidget(self.tabs)

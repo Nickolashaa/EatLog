@@ -27,6 +27,7 @@ from ...graphql.client import (
 )
 from ...utils.gql import client
 from ...utils.profile import Kbzhu, calculate_kbzhu, get_uuid, profile_exists
+from ...utils.theme import theme
 from ...utils.worker import Worker
 from ..header import Header
 from ..profile_form import ProfileForm
@@ -63,11 +64,23 @@ class SettingsWidget(QWidget):
         self.profile_form = ProfileForm(button_text="Обновить")
         self.profile_form.saved.connect(self._on_profile_saved)
 
+        appearance_title = QLabel("Оформление")
+        appearance_title.setObjectName("SectionTitle")
+
+        self.theme_btn = QPushButton()
+        self.theme_btn.setObjectName("RefreshBtn")
+        self.theme_btn.clicked.connect(theme.toggle)
+        theme.changed.connect(self._sync_theme_btn)
+        self._sync_theme_btn()
+
         left_layout = QVBoxLayout(left_panel)
         left_layout.setContentsMargins(28, 28, 28, 28)
         left_layout.setSpacing(22)
         left_layout.addWidget(profile_title)
         left_layout.addWidget(self.profile_form)
+        left_layout.addSpacing(8)
+        left_layout.addWidget(appearance_title)
+        left_layout.addWidget(self.theme_btn, alignment=Qt.AlignmentFlag.AlignLeft)
         left_layout.addStretch()
 
         right_panel = QWidget()
@@ -170,17 +183,23 @@ class SettingsWidget(QWidget):
         content = QWidget()
         content_layout = QHBoxLayout(content)
         content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(0)
+        content_layout.setSpacing(14)
         content_layout.addWidget(left_panel, 1)
         content_layout.addWidget(right_panel, 1)
 
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(14, 14, 14, 14)
+        main_layout.setSpacing(14)
         main_layout.addWidget(self.header)
         main_layout.addWidget(content, 1)
 
         self.setObjectName("SettingsWidget")
+
+    def _sync_theme_btn(self) -> None:
+        if theme.name == "dark":
+            self.theme_btn.setText("🌙 Тёмная тема")
+        else:
+            self.theme_btn.setText("☀️ Светлая тема")
 
     def _try_load_profile(self) -> None:
         if not profile_exists():
