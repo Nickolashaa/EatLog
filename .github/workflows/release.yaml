@@ -24,10 +24,13 @@ jobs:
         include:
           - os: ubuntu-latest
             ext: ""
+            short_name: linux
           - os: macos-latest
             ext: ""
+            short_name: mac
           - os: windows-latest
             ext: ".exe"
+            short_name: windows
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -41,7 +44,7 @@ jobs:
         working-directory: ./client/desktop/
         run: uv run pyinstaller ./EatLog.spec
       - name: Rename bin
-        run: mv ./client/desktop/dist/* ./client/desktop/dist/EatLog-${{ inputs.version }}-${{ matrix.os }}${{ matrix.ext }}
+        run: mv ./client/desktop/dist/* ./client/desktop/dist/EatLog-${{ inputs.version }}-${{ matrix.short_name }}${{ matrix.ext }}
       - name: Create artifact
         uses: actions/upload-artifact@v7
         with:
