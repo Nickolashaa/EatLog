@@ -69,3 +69,5 @@ jobs:
         tag_name: ${{ inputs.version }}
         body: ${{ inputs.release_text }}
         files: ./bin/*
+        permissions:
+          contents: write
