@@ -23,6 +23,14 @@ def parse_args(command: CommandObject) -> UUID | None:
         return None
 
 
+def build_greeting(name: str, id: UUID) -> str:
+    return (
+        f"Привет, {html.escape(name)}!\n"
+        f"Рад приветствовать тебя в сообществе EatLog!\n"
+        f"Вот твой UUID: <code>{id}</code>"
+    )
+
+
 @router.message(CommandStart())
 async def start(
     message: Message,
@@ -40,12 +48,11 @@ async def start(
 
         if isinstance(user, GetUserByTelegramIdUserByTelegramIdUser):
             await message.answer(
-                f"Привет, {html.escape(user.name)}!\n"
-                f"Вот твой UUID: <code>{user.id}</code>",
+                text=build_greeting(name=user.name, id=user.id),
                 parse_mode=ParseMode.HTML,
             )
             return
-        await message.answer("Привет, незнакомец! Как ты сюда попал?)")
+        await message.answer("Привет, Незнакомец! Как ты сюда попал?)")
         return
 
     id = parse_args(command)
@@ -59,7 +66,8 @@ async def start(
     updated_user = update_data.update_user
     if isinstance(updated_user, UpdateUserUpdateUserUser):
         await message.answer(
-            f"Регистрация успешна! Добро пожаловать, {updated_user.name}"
+            text=build_greeting(name=updated_user.name, id=updated_user.id),
+            parse_mode=ParseMode.HTML,
         )
         return
     await message.answer("Пользователь не найден, увы")
