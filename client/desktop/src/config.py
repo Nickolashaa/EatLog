@@ -1,9 +1,20 @@
+import sys
+from pathlib import Path
+
+
+def resource_path(name: str) -> str:
+    base = getattr(sys, "_MEIPASS", None)
+    root = Path(base) if base else Path(__file__).resolve().parent
+    return str(root / name)
+
+
 API_URL = "http://api.eat-log.ru"
 BOT_USERNAME = "eat_log_bot"
 
 WIDTH = 1280
 HEIGHT = 720
 TITLE = "🥪 EAT LOG 🥪"
+ICON_PATH = resource_path("assets/favicon.ico")
 
 # Catppuccin Mocha
 QSS_COLORS_DARK = {

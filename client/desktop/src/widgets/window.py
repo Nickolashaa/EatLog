@@ -1,6 +1,7 @@
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QTabWidget, QWidget
 
-from ..config import HEIGHT, TITLE, WIDTH
+from ..config import HEIGHT, ICON_PATH, TITLE, WIDTH
 from .daily_report import DailyReport
 from .meal_log_table import MealLogTableWidget
 from .meal_search import MealSearch
@@ -13,6 +14,7 @@ class EatLogWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle(TITLE)
+        self.setWindowIcon(QIcon(ICON_PATH))
         self.resize(WIDTH, HEIGHT)
 
         meal_search = MealSearch()
