@@ -81,5 +81,5 @@ jobs:
           script: |
             docker compose pull
             docker compose up -d
-            docker exec -it eat_log_api uv run alembic upgrade head
+            docker exec -i eat_log_api uv run alembic upgrade head
             docker image prune -f
