@@ -2,7 +2,7 @@ from PyQt6.QtCore import QRectF, Qt, QTimer
 from PyQt6.QtGui import QColor, QPainter, QPaintEvent, QPen
 from PyQt6.QtWidgets import QWidget
 
-from ..config import QSS_COLORS
+from ..utils.theme import theme
 
 
 class Spinner(QWidget):
@@ -11,18 +11,25 @@ class Spinner(QWidget):
         parent: QWidget | None = None,
         size: int = 28,
         line_width: int = 3,
-        color: str = QSS_COLORS["primary"],
+        color: str | None = None,
         span: int = 280,
     ) -> None:
         super().__init__(parent=parent)
         self._size = size
         self._line_width = line_width
-        self._color = QColor(color)
+        self._color_key = color
+        self._color = QColor(color or theme.colors["primary"])
         self._span = span
+        if color is None:
+            theme.changed.connect(self._apply_theme)
         self._angle = 0
         self.setFixedSize(size, size)
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
+
+    def _apply_theme(self) -> None:
+        self._color = QColor(theme.colors["primary"])
+        self.update()
 
     def start(self) -> None:
         if not self._timer.isActive():

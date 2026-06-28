@@ -1,7 +1,5 @@
 from string import Template
 
-from ..config import QSS_COLORS
-
 _TEMPLATE = Template(
     """
 QMainWindow {
@@ -10,24 +8,31 @@ QMainWindow {
 
 QTabWidget::pane {
     background-color: $bg;
-    border: 1px solid $border;
+    border: none;
+    margin-top: 8px;
+}
+
+QTabBar {
+    background-color: $bg;
+    qproperty-drawBase: 0;
 }
 
 QTabBar::tab {
-    background-color: $bg_secondary;
+    background-color: $bg;
     color: $text_muted;
-    padding: 8px 18px;
+    padding: 15px 24px;
     border: none;
+    border-bottom: 3px solid $bg;
+    font-size: 17px;
+    font-weight: bold;
 }
 
 QTabBar::tab:selected {
-    background-color: $bg_elevated;
-    color: $text;
-    border-bottom: 2px solid $primary;
+    color: $primary;
+    border-bottom: 3px solid $primary;
 }
 
 QTabBar::tab:hover:!selected {
-    background-color: $bg_elevated;
     color: $text;
 }
 
@@ -59,6 +64,8 @@ QDialog {
 
 #SettingsPanel {
     background-color: $bg;
+    border: 1px solid $border;
+    border-radius: 6px;
 }
 
 #Header {
@@ -470,4 +477,6 @@ QScrollBar::sub-line:vertical {
 """
 )
 
-STYLE = _TEMPLATE.substitute(QSS_COLORS)
+
+def build_style(colors: dict[str, str]) -> str:
+    return _TEMPLATE.substitute(colors)

@@ -12,11 +12,11 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..config import QSS_COLORS
 from ..graphql.client import GetUser, GetUserUserUser, MealLogFilter, MealLogs
 from ..utils.gql import client
 from ..utils.nutrition import Macros, sum_macros
 from ..utils.profile import Kbzhu, calculate_kbzhu, get_uuid, profile_exists
+from ..utils.theme import theme
 from ..utils.worker import Worker
 from .flask_loader import FlaskLoader
 from .header import Header
@@ -28,6 +28,7 @@ class DailyReport(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self._init_ui()
         self.refresh()
+        theme.changed.connect(self.refresh)
 
     def _init_ui(self) -> None:
         self.header = Header(parent=self, text="Ежедневный отчет")
@@ -62,7 +63,7 @@ class DailyReport(QWidget):
         mid_layout.addWidget(calories_col)
 
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(20, 20, 20, 0)
         main_layout.setSpacing(0)
         main_layout.addLayout(header_row)
         main_layout.addLayout(mid_layout, 1)
@@ -135,13 +136,13 @@ class DailyReport(QWidget):
 
         def color(actual: float, target: int) -> str:
             if target <= 0:
-                return QSS_COLORS["success"]
+                return theme.colors["success"]
             ratio = actual / target
             if ratio <= 1.0:
-                return QSS_COLORS["success"]
+                return theme.colors["success"]
             if ratio <= 1.2:
-                return QSS_COLORS["warning"]
-            return QSS_COLORS["error"]
+                return theme.colors["warning"]
+            return theme.colors["error"]
 
         def fmt(actual: float, target: int, unit: str) -> str:
             a = round(actual, 1)

@@ -5,15 +5,15 @@ from PyQt6.QtWidgets import QApplication, QMessageBox
 
 from src.utils.gql import health_check
 from src.utils.profile import profile_exists
+from src.utils.theme import theme
 from src.widgets.profile_setup import ProfileSetupDialog
-from src.widgets.style import STYLE
 from src.widgets.window import EatLogWindow
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setFont(QFont("Cantarell", 11))
 
-    app.setStyleSheet(STYLE)
+    app.setStyleSheet(theme.stylesheet)
 
     if not health_check():
         QMessageBox.critical(

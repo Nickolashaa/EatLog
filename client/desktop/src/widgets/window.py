@@ -33,9 +33,13 @@ class EatLogWindow(QMainWindow):
         meal_log_table.entry_deleted.connect(daily_report.refresh)
 
         self.tabs = QTabWidget()
-        self.tabs.addTab(home_widget, "Главная")
-        self.tabs.addTab(meal_table, "Блюда")
-        self.tabs.addTab(meal_log_table, "Журнал")
-        self.tabs.addTab(SettingsWidget(), "Настройки")
+        self.tabs.setDocumentMode(True)
+        tab_bar = self.tabs.tabBar()
+        if tab_bar is not None:
+            tab_bar.setExpanding(True)
+        self.tabs.addTab(home_widget, "🏠  Главная")
+        self.tabs.addTab(meal_table, "🍽  Блюда")
+        self.tabs.addTab(meal_log_table, "📖  Журнал")
+        self.tabs.addTab(SettingsWidget(), "⚙  Настройки")
 
         self.setCentralWidget(self.tabs)
