@@ -1,10 +1,17 @@
-class ObjectNotFound(Exception):
-    def __init__(self, message: str, **kwargs: object) -> None:
-        super().__init__(message)
-        self.details = kwargs
+from uuid import UUID
 
 
-class ObjectAlreadyExists(Exception):
-    def __init__(self, message: str, **kwargs: object) -> None:
+class BaseException(Exception):
+    def __init__(self, message: str, **kwargs: int | str | UUID | None) -> None:
         super().__init__(message)
-        self.details = kwargs
+        self.error_text = f"{message}\n{
+            '\n'.join([f'{key}: {value}' for key, value in kwargs.items()])
+        }"
+
+
+class ObjectNotFound(BaseException):
+    pass
+
+
+class ObjectAlreadyExists(BaseException):
+    pass

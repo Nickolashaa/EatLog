@@ -1,0 +1,5 @@
+query Meals($filter: MealFilters, $limit: Int, $offset: Int) {
+    meals(filter: $filter, limit: $limit, offset: $offset) {
+        ...MealFields
+    }
+}

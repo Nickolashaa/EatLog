@@ -1,0 +1,5 @@
+query MealLogs($filter: MealLogFilter, $limit: Int, $offset: Int) {
+    mealLogs(filter: $filter, limit: $limit, offset: $offset) {
+        ...MealLogFields
+    }
+}

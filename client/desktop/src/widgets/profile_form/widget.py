@@ -1,5 +1,3 @@
-from typing import Literal
-
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QDoubleValidator, QIntValidator
 from PyQt6.QtWidgets import (
@@ -11,8 +9,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ...services.profile.types import ProfileBase
-from .types import GENDER_OPTIONS, GOAL_OPTIONS
+from ...graphql.client import UserFields
+from .types import GENDER_OPTIONS, GOAL_OPTIONS, ProfileFormValues
 
 
 class ProfileForm(QWidget):
@@ -69,23 +67,23 @@ class ProfileForm(QWidget):
         layout.addLayout(form)
         layout.addWidget(self.save_btn)
 
-    def load(self, profile: ProfileBase) -> None:
-        self.name_input.setText(profile["name"])
+    def load(self, user: UserFields) -> None:
+        self.name_input.setText(user.name)
         gender_idx = next(
-            (i for i, (_, v) in enumerate(GENDER_OPTIONS) if v == profile["gender"]),
+            (i for i, (_, v) in enumerate(GENDER_OPTIONS) if v == user.gender),
             0,
         )
         self.gender_combo.setCurrentIndex(gender_idx)
-        self.weight_input.setText(str(profile["weight"]))
-        self.height_input.setText(str(profile["height"]))
-        self.age_input.setText(str(profile["age"]))
+        self.weight_input.setText(str(user.weight))
+        self.height_input.setText(str(user.height))
+        self.age_input.setText(str(user.age))
         goal_idx = next(
-            (i for i, (_, v) in enumerate(GOAL_OPTIONS) if v == profile["goal"]),
+            (i for i, (_, v) in enumerate(GOAL_OPTIONS) if v == user.goal),
             0,
         )
         self.goal_combo.setCurrentIndex(goal_idx)
 
-    def get_values(self) -> ProfileBase | None:
+    def get_values(self) -> ProfileFormValues | None:
         name = self.name_input.text().strip()
         weight_text = self.weight_input.text().strip().replace(",", ".")
         height_text = self.height_input.text().strip().replace(",", ".")
@@ -101,12 +99,8 @@ class ProfileForm(QWidget):
         except ValueError:
             return None
 
-        gender: Literal["male", "female"] = GENDER_OPTIONS[
-            self.gender_combo.currentIndex()
-        ][1]
-        goal: Literal["maintain", "lose", "gain"] = GOAL_OPTIONS[
-            self.goal_combo.currentIndex()
-        ][1]
+        gender = GENDER_OPTIONS[self.gender_combo.currentIndex()][1]
+        goal = GOAL_OPTIONS[self.goal_combo.currentIndex()][1]
 
         return {
             "name": name,

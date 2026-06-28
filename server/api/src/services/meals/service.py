@@ -1,28 +1,25 @@
 from typing import Unpack
 
-from sqlalchemy import delete, insert, or_, select, update
+from sqlalchemy import insert, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database.models.meals import Meal
-from ...schemas.meals import MealResponse
-from ..exceptions import ObjectAlreadyExists, ObjectNotFound
-from .types import MealCreateParams, MealListFilters, MealUpdateParams
+from ..exceptions import ObjectAlreadyExists
+from .schemas import MealSchema
+from .types import MealCreateParams, MealListFilters
 
 
 class MealService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get(self, id: int) -> MealResponse:
-        stmt = select(Meal).where(Meal.id == id)
-        res = await self.session.execute(stmt)
-        instance = res.scalar_one_or_none()
-        if instance is None:
-            raise ObjectNotFound(message="Meal not found", id=id)
-        return MealResponse.model_validate(instance)
-
-    async def get_list(self, **filters: Unpack[MealListFilters]) -> list[MealResponse]:
+    async def get_list(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        **filters: Unpack[MealListFilters],
+    ) -> list[MealSchema]:
         stmt = select(Meal).order_by(Meal.title)
         if search_query := filters.get("search_query"):
             stmt = stmt.where(
@@ -33,36 +30,23 @@ class MealService:
                     Meal.title.icontains(search_query.capitalize()),
                 )
             )
-        if offset := filters.get("offset"):
-            stmt = stmt.offset(offset)
-        if limit := filters.get("limit"):
-            stmt = stmt.limit(limit)
-        res = await self.session.execute(stmt)
-        return [MealResponse.model_validate(m) for m in res.scalars().all()]
+        if ids := filters.get("ids"):
+            stmt = stmt.where(Meal.id.in_(ids))
 
-    async def create(self, **values: Unpack[MealCreateParams]) -> MealResponse:
+        stmt = stmt.offset(offset).limit(limit)
+
+        res = await self.session.execute(stmt)
+        return [
+            MealSchema.model_validate(instance, from_attributes=True)
+            for instance in res.scalars().all()
+        ]
+
+    async def create(self, **values: Unpack[MealCreateParams]) -> MealSchema:
         try:
             stmt = insert(Meal).values(values).returning(Meal)
             res = await self.session.execute(stmt)
-            return MealResponse.model_validate(res.scalar_one())
+            return MealSchema.model_validate(res.scalar_one(), from_attributes=True)
         except IntegrityError:
             raise ObjectAlreadyExists(
                 message="Meal already exists", title=values.get("title")
             )
-
-    async def update(self, id: int, **values: Unpack[MealUpdateParams]) -> MealResponse:
-        try:
-            stmt = update(Meal).where(Meal.id == id).values(values).returning(Meal)
-            res = await self.session.execute(stmt)
-            instance = res.scalar_one_or_none()
-            if instance is None:
-                raise ObjectNotFound(message="Meal not found", id=id)
-            return MealResponse.model_validate(instance)
-        except IntegrityError:
-            raise ObjectAlreadyExists(
-                message="Meal already exists", title=values.get("title")
-            )
-
-    async def delete(self, id: int) -> None:
-        stmt = delete(Meal).where(Meal.id == id)
-        await self.session.execute(stmt)

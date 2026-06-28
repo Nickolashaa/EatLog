@@ -1,23 +1,23 @@
-import enum
 import uuid
 from datetime import datetime
+from enum import StrEnum
 
-from sqlalchemy import BigInteger, DateTime, func, text
+from sqlalchemy import DateTime, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import expression
 
 from ..connection import Base
 
 
-class Gender(enum.Enum):
-    MALE = "male"
-    FEMALE = "female"
+class Gender(StrEnum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
 
 
-class Goal(enum.Enum):
-    MAINTAIN = "maintain"
-    LOSE = "lose"
-    GAIN = "gain"
+class Goal(StrEnum):
+    MAINTAIN = "MAINTAIN"
+    LOSE = "LOSE"
+    GAIN = "GAIN"
 
 
 class User(Base):
@@ -26,7 +26,7 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True, server_default=text("gen_random_uuid()")
     )
-    telegram_id: Mapped[int | None] = mapped_column(BigInteger)
+    telegram_id: Mapped[str | None]
     gender: Mapped[Gender]
     weight: Mapped[float]
     height: Mapped[float]

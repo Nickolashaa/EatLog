@@ -17,10 +17,12 @@ from PyQt6.QtWidgets import (
 )
 
 from ..config import BOT_USERNAME
-from ..services.profile import Profile, ProfileBase, ProfileService
-from ..services.users import UserApiService
+from ..graphql.client import CreateUser, CreateUserInput, GetUser, GetUserUserUser
+from ..utils.gql import client
+from ..utils.profile import set_uuid
 from ..utils.worker import Worker
 from .profile_form import ProfileForm
+from .profile_form.types import ProfileFormValues
 
 
 class ProfileSetupDialog(QDialog):
@@ -120,26 +122,28 @@ class ProfileSetupDialog(QDialog):
         self.stack.setCurrentIndex(index)
 
     def _on_request_uuid(self) -> None:
-        url = QUrl(f"https://t.me/{BOT_USERNAME}?start=login")
+        url = QUrl(f"https://t.me/{BOT_USERNAME}")
         QDesktopServices.openUrl(url)
 
     def _on_login(self) -> None:
         text = self.uuid_input.text().strip()
         try:
-            uuid = str(UUID(text))
+            uuid = UUID(text)
         except ValueError:
             QMessageBox.warning(self, "Ошибка", "Введите корректный UUID.")
             return
         self.login_btn.setEnabled(False)
-        self._worker = Worker(UserApiService.get, uuid)
+        self._worker = Worker(client.get_user, uuid)
         self._worker.finished.connect(self._finish_login)
         self._worker.failed.connect(self._on_login_error)
         self._worker.start()
 
-    def _finish_login(self, profile: object) -> None:
-        p = cast(Profile, profile)
-        ProfileService.set_uuid(p["uuid"])
-        ProfileService.set_cache(p)
+    def _finish_login(self, result: object) -> None:
+        user = cast(GetUser, result).user
+        if not isinstance(user, GetUserUserUser):
+            self._on_login_error("пользователь не найден")
+            return
+        set_uuid(str(user.id))
         self.accept()
 
     def _on_login_error(self, msg: str) -> None:
@@ -151,22 +155,25 @@ class ProfileSetupDialog(QDialog):
         )
 
     def _on_saved(self, profile: object) -> None:
-        p = cast(ProfileBase, profile)
+        values = cast(ProfileFormValues, profile)
         self._form.save_btn.setEnabled(False)
-        self._worker = Worker(UserApiService.create, p)
-        self._worker.finished.connect(lambda uuid: self._finish(p, str(uuid)))
+        input_ = CreateUserInput(
+            name=values["name"],
+            gender=values["gender"],
+            weight=values["weight"],
+            height=values["height"],
+            age=values["age"],
+            goal=values["goal"],
+            hardMod=False,
+        )
+        self._worker = Worker(client.create_user, input_)
+        self._worker.finished.connect(self._finish)
         self._worker.failed.connect(self._on_error)
         self._worker.start()
 
-    def _finish(self, base: ProfileBase, uuid: str) -> None:
-        full: Profile = {
-            **base,
-            "uuid": uuid,
-            "notification_time": None,
-            "hard_mod": False,
-        }
-        ProfileService.set_uuid(uuid)
-        ProfileService.set_cache(full)
+    def _finish(self, result: object) -> None:
+        user = cast(CreateUser, result).create_user
+        set_uuid(str(user.id))
         self.accept()
 
     def _on_error(self, msg: str) -> None:

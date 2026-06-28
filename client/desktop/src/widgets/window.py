@@ -31,7 +31,6 @@ class EatLogWindow(QMainWindow):
         meal_table = MealTableWidget()
 
         meal_log_table.entry_deleted.connect(daily_report.refresh)
-        meal_table.meal_deleted.connect(daily_report.refresh)
 
         self.tabs = QTabWidget()
         self.tabs.addTab(home_widget, "Главная")

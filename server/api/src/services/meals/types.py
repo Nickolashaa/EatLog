@@ -3,8 +3,7 @@ from typing import NotRequired, Required, TypedDict
 
 class MealListFilters(TypedDict):
     search_query: NotRequired[str]
-    limit: NotRequired[int]
-    offset: NotRequired[int]
+    ids: NotRequired[list[int]]
 
 
 class MealCreateParams(TypedDict):
@@ -13,11 +12,3 @@ class MealCreateParams(TypedDict):
     protein: Required[float]
     fat: Required[float]
     carbohydrate: Required[float]
-
-
-class MealUpdateParams(TypedDict):
-    title: NotRequired[str]
-    calories: NotRequired[float]
-    protein: NotRequired[float]
-    fat: NotRequired[float]
-    carbohydrate: NotRequired[float]

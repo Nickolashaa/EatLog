@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "httpx>=0.28.0",
+    "ariadne-codegen>=0.18.0",
     "pyqt6>=6.11.0",
 ]
 
@@ -15,8 +15,25 @@ select = ["E", "F", "I"]
 [tool.mypy]
 strict = true
 
+[[tool.mypy.overrides]]
+module = "src.graphql.*"
+ignore_errors = true
+
 [dependency-groups]
 dev = [
     "mypy>=1.20.2",
     "ruff>=0.15.12",
 ]
+
+[tool.ariadne-codegen]
+remote_schema_url = "http://localhost:5285/graphql"
+queries_path = "./src/graphql/"
+target_package_path = "./src/graphql/"
+target_package_name = "client"
+async_client = false
+
+[tool.ariadne-codegen.scalars.DateTime]
+type = "datetime.datetime"
+
+[tool.ariadne-codegen.scalars.UUID]
+type = "uuid.UUID"

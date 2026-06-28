@@ -1,0 +1,10 @@
+mutation UpdateUser($id: UUID!, $input: UpdateUserInput!) {
+  updateUser(id: $id, input: $input) {
+    ... on User {
+      ...UserFields
+    }
+    ... on ObjectNotFoundError {
+      message
+    }
+  }
+}

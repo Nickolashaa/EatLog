@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import cast
+from uuid import UUID
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -12,8 +13,10 @@ from PyQt6.QtWidgets import (
 )
 
 from ..config import QSS_COLORS
-from ..services.meal_log import MealLogApiService, MealLogTotals
-from ..services.profile import Profile, ProfileService
+from ..graphql.client import GetUser, GetUserUserUser, MealLogFilter, MealLogs
+from ..utils.gql import client
+from ..utils.nutrition import Macros, sum_macros
+from ..utils.profile import Kbzhu, calculate_kbzhu, get_uuid, profile_exists
 from ..utils.worker import Worker
 from .flask_loader import FlaskLoader
 from .header import Header
@@ -93,30 +96,40 @@ class DailyReport(QWidget):
         return flask, value_lbl, container
 
     def refresh(self) -> None:
-        if not ProfileService.exists():
+        if not profile_exists():
             return
 
-        self._profile_worker = Worker(ProfileService.load)
-        self._profile_worker.finished.connect(self._on_profile_loaded)
+        self._profile_worker = Worker(client.get_user, UUID(get_uuid()))
+        self._profile_worker.finished.connect(self._on_user_loaded)
         self._profile_worker.failed.connect(self._on_error)
         self._profile_worker.start()
 
-    def _on_profile_loaded(self, profile: object) -> None:
-        p = cast(Profile, profile)
+    def _on_user_loaded(self, result: object) -> None:
+        user = cast(GetUser, result).user
+        if not isinstance(user, GetUserUserUser):
+            return
+        kbzhu = calculate_kbzhu(
+            gender=user.gender,
+            weight=user.weight,
+            height=user.height,
+            age=user.age,
+            goal=user.goal,
+        )
+        target_date = datetime.now().astimezone(timezone.utc).date()
         self._worker = Worker(
-            MealLogApiService.get_daily_totals,
-            user_id=p["uuid"],
-            target_date=datetime.now().astimezone(timezone.utc).date(),
+            client.meal_logs,
+            filter_=MealLogFilter(userId=user.id, dateFilter=target_date),
+            limit=1000,
         )
         self._worker.finished.connect(
-            lambda totals: self._update_display(cast(MealLogTotals, totals), p)
+            lambda result: self._update_display(
+                sum_macros(cast(MealLogs, result).meal_logs), kbzhu
+            )
         )
         self._worker.failed.connect(self._on_error)
         self._worker.start()
 
-    def _update_display(self, totals: MealLogTotals, profile: Profile) -> None:
-        kbzhu = ProfileService.calculate(profile)
-
+    def _update_display(self, totals: Macros, kbzhu: Kbzhu) -> None:
         def pct(actual: float, target: int) -> int:
             return min(100, round(actual * 100 / target)) if target > 0 else 0
 

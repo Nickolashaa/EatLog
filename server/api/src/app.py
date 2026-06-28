@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import meal_log, meals, users
+from .graphql import graphql_app
 
 app = FastAPI(title="EatLog API")
 
@@ -12,9 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(meals.router)
-app.include_router(meal_log.router)
-app.include_router(users.router)
+app.include_router(graphql_app, prefix="/graphql")
 
 
 @app.get("/health")
