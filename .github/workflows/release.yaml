@@ -21,7 +21,13 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            ext: ""
+          - os: macos-latest
+            ext: ""
+          - os: windows-latest
+            ext: ".exe"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -31,9 +37,11 @@ jobs:
       - name: Setup dependencies
         working-directory: ./client/desktop/
         run: uv sync
-      - name: Build
+      - name: Build bin
         working-directory: ./client/desktop/
         run: uv run pyinstaller ./EatLog.spec
+      - name: Rename bin
+        run: mv ./client/desktop/dist/* ./client/desktop/dist/EatLog-${{ inputs.version }}-${{ matrix.os }}${{ matrix.ext }}
       - name: Create artifact
         uses: actions/upload-artifact@v7
         with:
@@ -55,6 +63,6 @@ jobs:
       if: ${{ !inputs.debug }}
       uses: softprops/action-gh-release@v3
       with:
-        tag_name: ${{ input.version }}
-        body: ${{ input.release_text }}
+        tag_name: ${{ inputs.version }}
+        body: ${{ inputs.release_text }}
         files: ./bin/*
