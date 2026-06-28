@@ -1,0 +1,60 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Версия"
+        required: true
+        type: string
+      debug:
+        description: "Debug режим"
+        required: true
+        default: true
+        type: boolean
+      release_text:
+        description: "Текст релиза"
+        required: true
+        type: string
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+      - name: Setup dependencies
+        working-directory: ./client/desktop/
+        run: uv sync
+      - name: Build
+        working-directory: ./client/desktop/
+        run: uv run pyinstaller ./EatLog.spec
+      - name: Create artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: artifact-${{ matrix.os }}
+          path: ./client/desktop/dist/*
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v8
+      with:
+        path: ./bin/
+        pattern: artifact-*
+        merge-multiple: true
+    - name: Ls bin dir
+      run: ls ./bin/
+    - name: Create release
+      if: ${{ !inputs.debug }}
+      uses: softprops/action-gh-release@v3
+      with:
+        tag_name: ${{ input.version }}
+        body: ${{ input.release_text }}
+        files: ./bin/*
