@@ -34,5 +34,8 @@ target_package_name = "client"
 [tool.ariadne-codegen.scalars.DateTime]
 type = "datetime.datetime"
 
+[tool.ariadne-codegen.scalars.Time]
+type = "datetime.time"
+
 [tool.ariadne-codegen.scalars.UUID]
 type = "uuid.UUID"
