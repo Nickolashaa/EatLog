@@ -2,6 +2,4 @@ fragment UserFields on User {
   id
   name
   telegramId
-  notificationTime
-  hardMod
 }

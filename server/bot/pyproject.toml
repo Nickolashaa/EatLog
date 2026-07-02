@@ -1,8 +1,6 @@
 [project]
-name = "bot"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+name = "eat_log_bot"
+version = "1.0.0"
 requires-python = ">=3.14"
 dependencies = [
     "aiogram>=3.28.2",
@@ -30,12 +28,6 @@ remote_schema_url = "http://api:5285/graphql"
 queries_path = "./src/graphql/"
 target_package_path = "./src/graphql/"
 target_package_name = "client"
-
-[tool.ariadne-codegen.scalars.DateTime]
-type = "datetime.datetime"
-
-[tool.ariadne-codegen.scalars.Time]
-type = "datetime.time"
 
 [tool.ariadne-codegen.scalars.UUID]
 type = "uuid.UUID"
