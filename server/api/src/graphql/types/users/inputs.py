@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import time
 
 import strawberry
 
@@ -15,7 +15,7 @@ class CreateUserInput:
     height: float
     age: int
     goal: Goal
-    notification_time: datetime | None = None
+    notification_time: time | None = None
     hard_mod: bool = False
 
     def to_service_params(self) -> UserCreateParams:
@@ -41,7 +41,7 @@ class UpdateUserInput:
     height: strawberry.Maybe[float]
     age: strawberry.Maybe[int]
     goal: strawberry.Maybe[Goal]
-    notification_time: strawberry.Maybe[datetime | None]
+    notification_time: strawberry.Maybe[time | None]
     hard_mod: strawberry.Maybe[bool]
 
     def to_service_params(self) -> UserUpdateParams:
