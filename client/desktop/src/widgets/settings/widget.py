@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import time
 from typing import cast
 from uuid import UUID
 
@@ -229,8 +229,7 @@ class SettingsWidget(QWidget):
     def _load_notifications(self, user: UserFields) -> None:
         nt = user.notification_time
         if nt:
-            local = nt.astimezone()
-            self.notification_time_edit.setTime(QTime(local.hour, local.minute))
+            self.notification_time_edit.setTime(QTime(nt.hour, nt.minute))
         self.notifications_check.setChecked(nt is not None)
         self.notification_time_edit.setVisible(nt is not None)
         self.hard_mod_check.setVisible(nt is not None)
@@ -245,11 +244,7 @@ class SettingsWidget(QWidget):
             return
         if self.notifications_check.isChecked():
             t = self.notification_time_edit.time()
-            notification_time: datetime | None = (
-                datetime.now()
-                .astimezone()
-                .replace(hour=t.hour(), minute=t.minute(), second=0, microsecond=0)
-            )
+            notification_time: time | None = time(hour=t.hour(), minute=t.minute())
         else:
             notification_time = None
         hard_mod = self.hard_mod_check.isChecked()
@@ -266,7 +261,7 @@ class SettingsWidget(QWidget):
         self._notifications_worker.start()
 
     def _finish_notifications_save(
-        self, notification_time: datetime | None, hard_mod: bool
+        self, notification_time: time | None, hard_mod: bool
     ) -> None:
         self.notifications_save_btn.setEnabled(True)
         if self._user is not None:

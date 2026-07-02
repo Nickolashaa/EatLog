@@ -1,6 +1,6 @@
 [project]
 name = "eat_log_desktop"
-version = "1.0.0"
+version = "1.0.1"
 description = "EatLog Desktop"
 requires-python = ">=3.14"
 dependencies = [
@@ -34,6 +34,9 @@ async_client = false
 
 [tool.ariadne-codegen.scalars.DateTime]
 type = "datetime.datetime"
+
+[tool.ariadne-codegen.scalars.Time]
+type = "datetime.time"
 
 [tool.ariadne-codegen.scalars.UUID]
 type = "uuid.UUID"
