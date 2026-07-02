@@ -30,6 +30,8 @@ class UserService:
 
         if ids := filters.get("ids"):
             stmt = stmt.where(User.id.in_(ids))
+        if notification_time := filters.get("notification_time"):
+            stmt = stmt.where(User.notification_time == notification_time)
 
         res = await self.session.execute(stmt)
 
