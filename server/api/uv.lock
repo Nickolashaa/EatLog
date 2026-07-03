@@ -168,6 +168,15 @@ wheels = [
 ]
 
 [[package]]
+name = "apscheduler-stubs"
+version = "0.1.0.dev2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ce/f7/f7e4eea2abbf330bbc0ba2e684018881e20ce995afd85f639d181f4b777c/apscheduler_stubs-0.1.0.dev2.tar.gz", hash = "sha256:6fd5b3db269d7fe7c2b01f91d41c969a03da05522858401734acd5d438401ec8", size = 8176, upload-time = "2026-06-10T14:44:21.457Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/58/02e729326ca42096255682ff97c112cbb4eb4872b2f99ef5a4070250cddb/apscheduler_stubs-0.1.0.dev2-py3-none-any.whl", hash = "sha256:460478813eef922cc1fb13df2de9989a4f9ae086d050f90f21e882f620a9c982", size = 23125, upload-time = "2026-06-10T14:44:20.44Z" },
+]
+
+[[package]]
 name = "ast-serialize"
 version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -290,6 +299,7 @@ dependencies = [
     { name = "aiogram" },
     { name = "alembic" },
     { name = "apscheduler" },
+    { name = "apscheduler-stubs" },
     { name = "asyncpg" },
     { name = "fastapi" },
     { name = "pydantic" },
@@ -309,6 +319,7 @@ requires-dist = [
     { name = "aiogram", specifier = ">=3.29.1" },
     { name = "alembic", specifier = ">=1.18.4" },
     { name = "apscheduler", specifier = ">=3.11.3" },
+    { name = "apscheduler-stubs", specifier = ">=0.1.0.dev2" },
     { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "fastapi", specifier = ">=0.136.1" },
     { name = "pydantic", specifier = ">=2.13.4" },
