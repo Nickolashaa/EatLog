@@ -32,6 +32,11 @@ class UserService:
             stmt = stmt.where(User.id.in_(ids))
         if notification_time := filters.get("notification_time"):
             stmt = stmt.where(User.notification_time == notification_time)
+        if telegram_id_exists := filters.get("telegram_id_exists"):
+            if telegram_id_exists is True:
+                stmt = stmt.where(User.telegram_id.is_not(None))
+            else:
+                stmt = stmt.where(User.telegram_id.is_(None))
 
         res = await self.session.execute(stmt)
 

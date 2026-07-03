@@ -33,3 +33,4 @@ class UserUpdateParams(TypedDict):
 class UserListFilters(TypedDict):
     ids: NotRequired[list[UUID]]
     notification_time: NotRequired[time | None]
+    telegram_id_exists: NotRequired[bool]
