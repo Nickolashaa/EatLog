@@ -37,8 +37,8 @@ class MealLogService:
             stmt = stmt.where(func.date(MealLog.created_at) == date_filter)
         if user_id := filters.get("user_id"):
             stmt = stmt.where(MealLog.user_id == user_id)
-        if exclude_user_ids := filters.get("exclude_user_ids"):
-            stmt = stmt.where(MealLog.user_id.notin_(exclude_user_ids))
+        if user_ids := filters.get("user_ids"):
+            stmt = stmt.where(MealLog.user_id.in_(user_ids))
 
         stmt = stmt.offset(offset).limit(limit)
 
