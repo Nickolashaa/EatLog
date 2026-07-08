@@ -23,7 +23,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
-          file: "./server/${{ matrix.instance }}"
+          file: "./server/${{ matrix.instance }}/Dockerfile"
           push: true
           tags: "grachevnr/eat_log_${{ matrix.instance }}:latest"
 
