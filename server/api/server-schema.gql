@@ -1,0 +1,157 @@
+interface BaseErrorInterface {
+  message: String!
+}
+
+input CreateMealInput {
+  title: String!
+  calories: Float!
+  protein: Float!
+  fat: Float!
+  carbohydrate: Float!
+}
+
+input CreateMealLogInput {
+  userId: UUID!
+  mealId: Int!
+  grams: Float!
+}
+
+union CreateMealLogOrError = MealLog | ObjectNotFoundError
+
+union CreateMealOrError = Meal | ObjectAlreadyExistsError
+
+input CreateUserInput {
+  name: String!
+  telegramId: String = null
+  gender: Gender!
+  weight: Float!
+  height: Float!
+  age: Int!
+  goal: Goal!
+  notificationTime: Time = null
+  hardMod: Boolean! = false
+}
+
+"""Date (isoformat)"""
+scalar Date
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+union GetUserOrError = User | ObjectNotFoundError
+
+enum Goal {
+  MAINTAIN
+  LOSE
+  GAIN
+}
+
+type Meal {
+  id: Int!
+  title: String!
+  calories: Float!
+  protein: Float!
+  fat: Float!
+  carbohydrate: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input MealFilters {
+  searchQuery: String
+}
+
+type MealLog {
+  id: Int!
+  grams: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  meal: Meal!
+}
+
+input MealLogFilter {
+  userId: UUID
+  dateFilter: Date
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: UUID!, input: UpdateUserInput!): UpdateUserOrError!
+  createMeal(input: CreateMealInput!): CreateMealOrError!
+  createMealLog(input: CreateMealLogInput!): CreateMealLogOrError!
+  updateMealLog(id: Int!, input: UpdateMealLogInput!): UpdateMealLogOrError!
+  deleteMealLog(id: Int!): Void
+}
+
+type ObjectAlreadyExistsError implements BaseErrorInterface {
+  message: String!
+}
+
+type ObjectNotFoundError implements BaseErrorInterface {
+  message: String!
+}
+
+type Query {
+  user(id: UUID!): GetUserOrError!
+  userByTelegramId(telegramId: String!): GetUserOrError!
+  users(filter: UsersFilterInput = null): [User!]!
+  meals(filter: MealFilters = null, limit: Int! = 10, offset: Int! = 0): [Meal!]!
+  mealLogs(filter: MealLogFilter = null, limit: Int! = 10, offset: Int! = 0): [MealLog!]!
+}
+
+"""Time (isoformat)"""
+scalar Time
+
+scalar UUID
+
+input UpdateMealLogInput {
+  userId: UUID
+  mealId: Int
+  grams: Float
+}
+
+union UpdateMealLogOrError = MealLog | ObjectNotFoundError
+
+input UpdateUserInput {
+  name: String
+  telegramId: String
+  gender: Gender
+  weight: Float
+  height: Float
+  age: Int
+  goal: Goal
+  notificationTime: Time
+  hardMod: Boolean
+}
+
+union UpdateUserOrError = User | ObjectNotFoundError
+
+type User {
+  id: UUID!
+  name: String!
+  telegramId: String
+  gender: Gender!
+  weight: Float!
+  height: Float!
+  age: Int!
+  goal: Goal!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  notificationTime: Time
+  hardMod: Boolean!
+}
+
+input UsersFilterInput {
+  withoutLogsOn: Date
+  notificationTime: Time
+  telegramIdExists: Boolean
+}
+
+"""Represents NULL values"""
+scalar Void
