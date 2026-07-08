@@ -70,9 +70,15 @@ class UpdateUserInput:
 @strawberry.input
 class UsersFilterInput:
     without_logs_on: strawberry.Maybe[date]
+    notification_time: strawberry.Maybe[time | None]
+    telegram_id_exists: strawberry.Maybe[bool]
 
     def to_service_params(self) -> UserListFilters:
         params: UserListFilters = {}
         if self.without_logs_on is not None:
             params["without_logs_on"] = self.without_logs_on.value
+        if self.notification_time is not None:
+            params["notification_time"] = self.notification_time.value
+        if self.telegram_id_exists is not None:
+            params["telegram_id_exists"] = self.telegram_id_exists.value
         return params
