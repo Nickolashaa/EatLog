@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [api, bot, nginx]
+        service: [api, bot, nginx, scheduler]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

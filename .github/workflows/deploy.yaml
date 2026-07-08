@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        instance: [api, nginx, bot]
+        instance: [api, nginx, bot, scheduler]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
