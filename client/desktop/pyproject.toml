@@ -1,10 +1,9 @@
 [project]
 name = "eat_log_desktop"
-version = "1.0.1"
-description = "EatLog Desktop"
+version = "1.1.0"
 requires-python = ">=3.14"
 dependencies = [
-    "ariadne-codegen>=0.18.0",
+    "gql",
     "pyqt6>=6.11.0",
 ]
 
@@ -14,9 +13,8 @@ select = ["E", "F", "I"]
 [tool.mypy]
 strict = true
 
-[[tool.mypy.overrides]]
-module = "src.graphql.*"
-ignore_errors = true
+[tool.uv.sources]
+gql = { path = "../../shared/gql" }
 
 [dependency-groups]
 dev = [
@@ -24,19 +22,3 @@ dev = [
     "pyinstaller>=6.21.0",
     "ruff>=0.15.12",
 ]
-
-[tool.ariadne-codegen]
-remote_schema_url = "http://localhost:5285/graphql"
-queries_path = "./src/graphql/"
-target_package_path = "./src/graphql/"
-target_package_name = "client"
-async_client = false
-
-[tool.ariadne-codegen.scalars.DateTime]
-type = "datetime.datetime"
-
-[tool.ariadne-codegen.scalars.Time]
-type = "datetime.time"
-
-[tool.ariadne-codegen.scalars.UUID]
-type = "uuid.UUID"

@@ -11,6 +11,9 @@ def resource_path(name: str) -> str:
 API_URL = "http://api.eat-log.ru"
 BOT_USERNAME = "eat_log_bot"
 
+GITHUB_REPO = "Nickolashaa/EatLog"
+RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases/latest"
+
 WIDTH = 1280
 HEIGHT = 720
 TITLE = "🥪 EAT LOG 🥪"

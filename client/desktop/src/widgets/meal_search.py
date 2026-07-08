@@ -1,6 +1,16 @@
 from typing import cast
 from uuid import UUID
 
+from gql.client import (
+    CreateMealCreateMealMeal,
+    CreateMealCreateMealObjectAlreadyExistsError,
+    CreateMealInput,
+    CreateMealLogCreateMealLogMealLog,
+    CreateMealLogCreateMealLogObjectNotFoundError,
+    CreateMealLogInput,
+    GetMealsMeals,
+    MealFilters,
+)
 from PyQt6.QtCore import QLocale, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtWidgets import (
@@ -16,17 +26,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..graphql.client import (
-    CreateMeal,
-    CreateMealCreateMealMeal,
-    CreateMealInput,
-    CreateMealLog,
-    CreateMealLogCreateMealLogMealLog,
-    CreateMealLogInput,
-    MealFilters,
-    Meals,
-    MealsMeals,
-)
 from ..utils.gql import client
 from ..utils.profile import get_uuid, profile_exists
 from ..utils.worker import Worker
@@ -40,7 +39,7 @@ class MealSearch(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self._meals: list[MealsMeals] = []
+        self._meals: list[GetMealsMeals] = []
         self._search_seq = 0
         self._init_ui()
 
@@ -139,7 +138,7 @@ class MealSearch(QWidget):
         self._search_seq += 1
         seq = self._search_seq
         self._search_worker = Worker(
-            client.meals, filter_=MealFilters(searchQuery=query), limit=5
+            client.get_meals, filter_=MealFilters(searchQuery=query), limit=5
         )
         self._search_worker.finished.connect(
             lambda data: self._on_search_result(seq, query, data)
@@ -150,7 +149,7 @@ class MealSearch(QWidget):
     def _on_search_result(self, seq: int, query: str, data: object) -> None:
         if seq != self._search_seq:
             return
-        meals = cast(Meals, data).meals
+        meals = cast(list[GetMealsMeals], data)
         if meals:
             self._no_results_section.hide()
             self._populate_table(meals)
@@ -159,7 +158,7 @@ class MealSearch(QWidget):
             self._create_title.setText(query)
             self._no_results_section.show()
 
-    def _populate_table(self, meals: list[MealsMeals]) -> None:
+    def _populate_table(self, meals: list[GetMealsMeals]) -> None:
         self._meals = meals
         self.table.setRowCount(len(meals))
 
@@ -196,7 +195,11 @@ class MealSearch(QWidget):
             return
 
         def on_added(result: object) -> None:
-            log = cast(CreateMealLog, result).create_meal_log
+            log = cast(
+                CreateMealLogCreateMealLogMealLog
+                | CreateMealLogCreateMealLogObjectNotFoundError,
+                result,
+            )
             if not isinstance(log, CreateMealLogCreateMealLogMealLog):
                 self._on_error(log.message)
                 return
@@ -234,7 +237,10 @@ class MealSearch(QWidget):
         self._create_worker.start()
 
     def _on_created(self, result: object) -> None:
-        meal = cast(CreateMeal, result).create_meal
+        meal = cast(
+            CreateMealCreateMealMeal | CreateMealCreateMealObjectAlreadyExistsError,
+            result,
+        )
         if not isinstance(meal, CreateMealCreateMealMeal):
             self._on_error(meal.message)
             return

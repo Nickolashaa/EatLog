@@ -1,9 +1,21 @@
+from typing import Any, cast
+
 import httpx
+from gql.client import Client
 
 from ..config import API_URL
-from ..graphql.client import Client
 
-client = Client(url=f"{API_URL}/graphql")
+
+class _ClientProxy:
+    def __getattr__(self, name: str) -> Any:
+        async def call(*args: Any, **kwargs: Any) -> Any:
+            async with Client(url=f"{API_URL}/graphql") as client_:
+                return await getattr(client_, name)(*args, **kwargs)
+
+        return call
+
+
+client = cast(Client, _ClientProxy())
 
 
 def health_check() -> bool:

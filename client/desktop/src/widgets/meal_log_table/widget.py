@@ -2,6 +2,11 @@ from datetime import date, datetime, timezone
 from typing import cast
 from uuid import UUID
 
+from gql.client import (
+    GetMealLogsMealLogs,
+    MealLogFilter,
+    UpdateMealLogInput,
+)
 from PyQt6.QtCore import QDate, Qt, pyqtSignal
 from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
@@ -12,12 +17,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ...graphql.client import (
-    MealLogFilter,
-    MealLogs,
-    MealLogsMealLogs,
-    UpdateMealLogInput,
-)
 from ...utils.gql import client
 from ...utils.nutrition import macros_for_log
 from ...utils.profile import get_uuid, profile_exists
@@ -34,7 +33,7 @@ class MealLogTableWidget(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self._logs: list[MealLogsMealLogs] = []
+        self._logs: list[GetMealLogsMealLogs] = []
         self._init_ui()
         self._load()
 
@@ -75,7 +74,7 @@ class MealLogTableWidget(QWidget):
         if not profile_exists():
             return
         self._load_worker = Worker(
-            client.meal_logs,
+            client.get_meal_logs,
             filter_=MealLogFilter(
                 userId=UUID(get_uuid()), dateFilter=self._selected_date()
             ),
@@ -86,7 +85,7 @@ class MealLogTableWidget(QWidget):
         self._load_worker.start()
 
     def _on_loaded(self, data: object) -> None:
-        self._logs = cast(MealLogs, data).meal_logs
+        self._logs = cast(list[GetMealLogsMealLogs], data)
         self.table.setRowCount(len(self._logs))
         for row, log in enumerate(self._logs):
             macros = macros_for_log(log)

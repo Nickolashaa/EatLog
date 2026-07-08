@@ -2,11 +2,15 @@ FROM python:3.14-slim
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-WORKDIR /app
+WORKDIR /app/shared/gql/
+COPY ./shared/gql/ ./
 
-COPY pyproject.toml uv.lock ./
+WORKDIR /app/server/scheduler/
+COPY ./server/scheduler/pyproject.toml ./server/scheduler/uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-COPY src/ ./src/
+WORKDIR /app/server/scheduler/src/
+COPY ./server/scheduler/src/ ./
 
+WORKDIR /app/server/scheduler/
 CMD ["uv", "run", "python", "-m", "src"]

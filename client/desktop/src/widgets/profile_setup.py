@@ -1,6 +1,12 @@
 from typing import cast
 from uuid import UUID
 
+from gql.client import (
+    CreateUserCreateUser,
+    CreateUserInput,
+    GetUserUserObjectNotFoundError,
+    GetUserUserUser,
+)
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (
@@ -17,7 +23,6 @@ from PyQt6.QtWidgets import (
 )
 
 from ..config import BOT_USERNAME
-from ..graphql.client import CreateUser, CreateUserInput, GetUser, GetUserUserUser
 from ..utils.gql import client
 from ..utils.profile import set_uuid
 from ..utils.worker import Worker
@@ -139,7 +144,7 @@ class ProfileSetupDialog(QDialog):
         self._worker.start()
 
     def _finish_login(self, result: object) -> None:
-        user = cast(GetUser, result).user
+        user = cast(GetUserUserUser | GetUserUserObjectNotFoundError, result)
         if not isinstance(user, GetUserUserUser):
             self._on_login_error("пользователь не найден")
             return
@@ -172,7 +177,7 @@ class ProfileSetupDialog(QDialog):
         self._worker.start()
 
     def _finish(self, result: object) -> None:
-        user = cast(CreateUser, result).create_user
+        user = cast(CreateUserCreateUser, result)
         set_uuid(str(user.id))
         self.accept()
 

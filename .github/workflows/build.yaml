@@ -17,5 +17,5 @@ jobs:
       - name: Build ${{ matrix.service }} image
         uses: docker/build-push-action@v6
         with:
-          context: ./server/${{ matrix.service }}
+          file: ./server/${{ matrix.service }}/Dockerfile
           push: false

@@ -1,3 +1,4 @@
+from gql.client import UserFields
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QDoubleValidator, QIntValidator
 from PyQt6.QtWidgets import (
@@ -9,7 +10,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ...graphql.client import UserFields
 from .types import GENDER_OPTIONS, GOAL_OPTIONS, ProfileFormValues
 
 

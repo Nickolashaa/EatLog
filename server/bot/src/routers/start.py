@@ -5,8 +5,7 @@ from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.types import Message
-
-from ..graphql.client import (
+from gql.client import (
     Client,
     GetUserByTelegramIdUserByTelegramIdUser,
     UpdateUserInput,
@@ -41,10 +40,9 @@ async def start(
         return
 
     if command.args is None:
-        get_data = await gql_client.get_user_by_telegram_id(
+        user = await gql_client.get_user_by_telegram_id(
             telegram_id=str(message.from_user.id)
         )
-        user = get_data.user_by_telegram_id
 
         if isinstance(user, GetUserByTelegramIdUserByTelegramIdUser):
             await message.answer(
@@ -59,11 +57,10 @@ async def start(
     if id is None:
         return
 
-    update_data = await gql_client.update_user(
+    updated_user = await gql_client.update_user(
         id=id,
         input=UpdateUserInput(telegramId=str(message.from_user.id)),
     )
-    updated_user = update_data.update_user
     if isinstance(updated_user, UpdateUserUpdateUserUser):
         await message.answer(
             text=build_greeting(name=updated_user.name, id=updated_user.id),

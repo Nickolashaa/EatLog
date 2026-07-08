@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from ...graphql.client import Gender, Goal
+from gql.client import Gender, Goal
 
 GENDER_OPTIONS: list[tuple[str, Gender]] = [
     ("Мужской", Gender.MALE),
