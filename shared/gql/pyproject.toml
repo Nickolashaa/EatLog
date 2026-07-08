@@ -1,0 +1,32 @@
+[project]
+name = "gql"
+version = "1.0.0"
+requires-python = ">=3.14"
+dependencies = [
+    "ariadne-codegen>=0.18.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.23,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.ariadne-codegen]
+schema_path = "./../../server/api/server-schema.gql"
+queries_path = "./src/gql/"
+target_package_path = "./src/gql/"
+target_package_name = "client"
+plugins = [
+    "ariadne_codegen.contrib.shorter_results.ShorterResultsPlugin"
+]
+
+[tool.ariadne-codegen.scalars.UUID]
+type = "uuid.UUID"
+
+[tool.ariadne-codegen.scalars.DateTime]
+type = "datetime.datetime"
+
+[tool.ariadne-codegen.scalars.Date]
+type = "datetime.date"
+
+[tool.ariadne-codegen.scalars.Time]
+type = "datetime.time"

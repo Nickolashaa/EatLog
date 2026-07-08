@@ -1,0 +1,10 @@
+query GetUser($id: UUID!) {
+	user(id: $id) {
+		... on User {
+			...UserFields
+		}
+		... on ObjectNotFoundError {
+			message
+		}
+	}
+}
