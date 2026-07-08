@@ -1,10 +1,10 @@
 [project]
 name = "eat_log_bot"
-version = "1.0.0"
+version = "1.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "aiogram>=3.28.2",
-    "ariadne-codegen>=0.18.0",
+    "gql",
 ]
 
 [tool.ruff.lint]
@@ -17,17 +17,11 @@ strict = true
 module = "src.graphql.*"
 ignore_errors = true
 
+[tool.uv.sources]
+gql = { path = "../../shared/gql" }
+
 [dependency-groups]
 dev = [
     "mypy>=2.1.0",
     "ruff>=0.15.16",
 ]
-
-[tool.ariadne-codegen]
-remote_schema_url = "http://api:5285/graphql"
-queries_path = "./src/graphql/"
-target_package_path = "./src/graphql/"
-target_package_name = "client"
-
-[tool.ariadne-codegen.scalars.UUID]
-type = "uuid.UUID"
