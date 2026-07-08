@@ -32,7 +32,7 @@ services:
       start_period: 5s
 
   schduler:
-    build: ./scheduler/
+    image: grachevnr/eat_log_scheduler:latest
     container_name: eat_log_scheduler
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
