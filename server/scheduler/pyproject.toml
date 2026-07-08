@@ -1,12 +1,12 @@
 [project]
 name = "eat_log_scheduler"
-version = "1.0.0"
+version = "1.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "aiogram>=3.29.1",
     "apscheduler>=3.11.3",
     "apscheduler-stubs>=0.1.0.dev2",
-    "ariadne-codegen>=0.18.0",
+    "gql",
 ]
 
 [dependency-groups]
@@ -25,23 +25,5 @@ strict = true
 module = "src.graphql.*"
 ignore_errors = true
 
-[tool.ariadne-codegen]
-remote_schema_url = "http://api:5285/graphql"
-queries_path = "./src/graphql/"
-target_package_path = "./src/graphql/"
-target_package_name = "client"
-plugins = [
-    "ariadne_codegen.contrib.shorter_results.ShorterResultsPlugin"
-]
-
-[tool.ariadne-codegen.scalars.UUID]
-type = "uuid.UUID"
-
-[tool.ariadne-codegen.scalars.DateTime]
-type = "datetime.datetime"
-
-[tool.ariadne-codegen.scalars.Date]
-type = "datetime.date"
-
-[tool.ariadne-codegen.scalars.Time]
-type = "datetime.time"
+[tool.uv.sources]
+gql = { path = "../../shared/gql" }

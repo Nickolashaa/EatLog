@@ -3,9 +3,9 @@ from datetime import datetime
 from logging import Logger, getLogger
 
 from aiogram import Bot
+from gql.client import Client, GetUsersUsers, UsersFilterInput
 
 from ..config import API_URL, BOT_TOKEN
-from ..graphql.client import Client, GetUsersUsers, UsersFilterInput
 
 
 async def _notify_users(

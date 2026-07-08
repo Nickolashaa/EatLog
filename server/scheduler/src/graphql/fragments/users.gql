@@ -1,4 +1,0 @@
-fragment UserFields on User {
-    telegramId
-    name
-}
