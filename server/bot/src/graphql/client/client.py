@@ -35,8 +35,6 @@ class Client(AsyncBaseClient):
               id
               name
               telegramId
-              notificationTime
-              hardMod
             }
             """)
         variables: dict[str, object] = {"id": id, "input": input}
@@ -66,8 +64,6 @@ class Client(AsyncBaseClient):
               id
               name
               telegramId
-              notificationTime
-              hardMod
             }
             """)
         variables: dict[str, object] = {"telegramId": telegram_id}

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, time
 from typing import Literal, NotRequired, Required, TypedDict
 from uuid import UUID
 
@@ -14,7 +14,7 @@ class UserCreateParams(TypedDict):
     height: Required[float]
     age: Required[int]
     goal: Required[GOAL]
-    notification_time: Required[datetime | None]
+    notification_time: Required[time | None]
     hard_mod: Required[bool]
 
 
@@ -26,9 +26,12 @@ class UserUpdateParams(TypedDict):
     height: NotRequired[float]
     age: NotRequired[int]
     goal: NotRequired[GOAL]
-    notification_time: NotRequired[datetime | None]
+    notification_time: NotRequired[time | None]
     hard_mod: NotRequired[bool]
 
 
 class UserListFilters(TypedDict):
     ids: NotRequired[list[UUID]]
+    notification_time: NotRequired[time | None]
+    telegram_id_exists: NotRequired[bool]
+    without_logs_on: NotRequired[date]

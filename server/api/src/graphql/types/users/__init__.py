@@ -1,5 +1,5 @@
 from .enums import Gender, Goal
-from .inputs import CreateUserInput, UpdateUserInput
+from .inputs import CreateUserInput, UpdateUserInput, UsersFilterInput
 from .types import User
 from .unions import GetUserOrError, UpdateUserOrError
 
@@ -11,4 +11,5 @@ __all__ = (
     "CreateUserInput",
     "UpdateUserInput",
     "UpdateUserOrError",
+    "UsersFilterInput",
 )

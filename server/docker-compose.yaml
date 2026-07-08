@@ -8,6 +8,7 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      BOT_TOKEN: ${BOT_TOKEN}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5285/health')"]
       interval: 5s
@@ -29,6 +30,21 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+
+  schduler:
+    build: ./scheduler/
+    container_name: eat_log_scheduler
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://api:5285/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      api:
+        condition: service_healthy
 
   nginx:
     image: grachevnr/eat_log_nginx:latest

@@ -1,5 +1,4 @@
 fragment UserFields on User {
-  id
-  name
-  telegramId
+    telegramId
+    name
 }

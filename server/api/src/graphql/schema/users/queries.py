@@ -5,7 +5,7 @@ import strawberry
 from ....services.exceptions import ObjectNotFound
 from ...context import AppInfo
 from ...types.errors import ObjectNotFoundError
-from ...types.users import GetUserOrError, User
+from ...types.users import GetUserOrError, User, UsersFilterInput
 
 
 @strawberry.type
@@ -39,3 +39,16 @@ class UsersQuery:
             )
         except ObjectNotFound as e:
             return ObjectNotFoundError.from_exception(e)
+
+    @strawberry.field
+    async def users(
+        self,
+        info: AppInfo,
+        filter: UsersFilterInput | None = None,
+    ) -> list[User]:
+        return [
+            User.from_schema(instance)
+            for instance in await info.context.services.user_service.get_list(
+                **filter.to_service_params() if filter is not None else {},
+            )
+        ]

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 from typing import Self
 from uuid import UUID
 
@@ -20,7 +20,7 @@ class User:
     goal: Goal
     created_at: datetime
     updated_at: datetime
-    notification_time: datetime | None
+    notification_time: time | None
     hard_mod: bool
 
     @classmethod

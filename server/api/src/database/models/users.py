@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, time
 from enum import StrEnum
 
-from sqlalchemy import DateTime, func, text
+from sqlalchemy import Time, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import expression
 
@@ -36,6 +36,6 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now()
     )
-    notification_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    notification_time: Mapped[time | None] = mapped_column(Time(timezone=True))
     hard_mod: Mapped[bool] = mapped_column(server_default=expression.false())
     name: Mapped[str]

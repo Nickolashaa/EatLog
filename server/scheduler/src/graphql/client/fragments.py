@@ -2,7 +2,6 @@
 # Source: ./src/graphql/
 
 from typing import Optional
-from uuid import UUID
 
 from pydantic import Field
 
@@ -10,9 +9,8 @@ from .base_model import BaseModel
 
 
 class UserFields(BaseModel):
-    id: UUID
-    name: str
     telegram_id: Optional[str] = Field(alias="telegramId")
+    name: str
 
 
 UserFields.model_rebuild()

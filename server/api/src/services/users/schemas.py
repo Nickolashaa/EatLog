@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -17,7 +17,7 @@ class UserSchema(BaseModel):
     height: float
     age: int
     goal: GOAL
-    notification_time: datetime | None
+    notification_time: time | None
     hard_mod: bool
     created_at: datetime
     updated_at: datetime

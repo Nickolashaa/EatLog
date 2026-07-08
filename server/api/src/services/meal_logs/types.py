@@ -5,6 +5,7 @@ from uuid import UUID
 
 class MealLogListFilters(TypedDict):
     user_id: NotRequired[UUID]
+    user_ids: NotRequired[list[UUID]]
     date_filter: NotRequired[date]
 
 
