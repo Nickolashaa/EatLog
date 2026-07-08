@@ -1,3 +1,0 @@
-mutation DeleteMealLog($id: Int!) {
-    deleteMealLog(id: $id)
-}

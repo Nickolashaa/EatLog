@@ -1,7 +1,15 @@
-from datetime import time
+from datetime import datetime, time
 from typing import cast
 from uuid import UUID
 
+from gql.client import (
+    GetUserUserObjectNotFoundError,
+    GetUserUserUser,
+    UpdateUserInput,
+    UpdateUserUpdateUserObjectNotFoundError,
+    UpdateUserUpdateUserUser,
+    UserFields,
+)
 from PyQt6.QtCore import Qt, QTime, QTimer, QUrl
 from PyQt6.QtGui import QDesktopServices, QHideEvent, QShowEvent
 from PyQt6.QtWidgets import (
@@ -17,14 +25,6 @@ from PyQt6.QtWidgets import (
 )
 
 from ...config import BOT_USERNAME
-from ...graphql.client import (
-    GetUser,
-    GetUserUserUser,
-    UpdateUser,
-    UpdateUserInput,
-    UpdateUserUpdateUserUser,
-    UserFields,
-)
 from ...utils.gql import client
 from ...utils.profile import Kbzhu, calculate_kbzhu, get_uuid, profile_exists
 from ...utils.theme import theme
@@ -209,7 +209,7 @@ class SettingsWidget(QWidget):
         self._profile_worker.start()
 
     def _on_profile_loaded(self, result: object) -> None:
-        user = cast(GetUser, result).user
+        user = cast(GetUserUserUser | GetUserUserObjectNotFoundError, result)
         if not isinstance(user, GetUserUserUser):
             return
         self._user = user
@@ -244,7 +244,10 @@ class SettingsWidget(QWidget):
             return
         if self.notifications_check.isChecked():
             t = self.notification_time_edit.time()
-            notification_time: time | None = time(hour=t.hour(), minute=t.minute())
+            local_tz = datetime.now().astimezone().tzinfo
+            notification_time: time | None = time(
+                hour=t.hour(), minute=t.minute(), tzinfo=local_tz
+            )
         else:
             notification_time = None
         hard_mod = self.hard_mod_check.isChecked()
@@ -307,7 +310,10 @@ class SettingsWidget(QWidget):
 
     def _finish_save(self, result: object) -> None:
         self.profile_form.save_btn.setEnabled(True)
-        user = cast(UpdateUser, result).update_user
+        user = cast(
+            UpdateUserUpdateUserUser | UpdateUserUpdateUserObjectNotFoundError,
+            result,
+        )
         if not isinstance(user, UpdateUserUpdateUserUser):
             self._on_save_error(user.message)
             return
@@ -359,7 +365,7 @@ class SettingsWidget(QWidget):
         self._telegram_worker.start()
 
     def _on_telegram_checked(self, result: object) -> None:
-        user = cast(GetUser, result).user
+        user = cast(GetUserUserUser | GetUserUserObjectNotFoundError, result)
         if not isinstance(user, GetUserUserUser) or user.telegram_id is None:
             return
         self._telegram_linked = True

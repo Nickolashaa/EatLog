@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from typing import TypedDict
 
-from ..graphql.client import MealLogFields
+from gql.client import MealLogFields
 
 
 class Macros(TypedDict):

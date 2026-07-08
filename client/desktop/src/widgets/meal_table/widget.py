@@ -1,5 +1,6 @@
 from typing import cast
 
+from gql.client import GetMealsMeals, MealFilters
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
@@ -9,7 +10,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ...graphql.client import MealFilters, Meals
 from ...utils.gql import client
 from ...utils.worker import Worker
 from ..header import Header
@@ -48,14 +48,14 @@ class MealTableWidget(QWidget):
 
     def _load(self, query: str = "") -> None:
         self._load_worker = Worker(
-            client.meals, filter_=MealFilters(searchQuery=query), limit=1000
+            client.get_meals, filter_=MealFilters(searchQuery=query), limit=1000
         )
         self._load_worker.finished.connect(self._on_loaded)
         self._load_worker.failed.connect(self._on_error)
         self._load_worker.start()
 
     def _on_loaded(self, data: object) -> None:
-        meals = cast(Meals, data).meals
+        meals = cast(list[GetMealsMeals], data)
         self.table.setRowCount(len(meals))
         for row, meal in enumerate(meals):
             self.table.setItem(row, 0, readonly(str(meal.id)))

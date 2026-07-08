@@ -1,8 +1,7 @@
 from typing import TypedDict
 
+from gql.client import Gender, Goal
 from PyQt6.QtCore import QSettings
-
-from ..graphql.client import Gender, Goal
 
 
 def _settings() -> QSettings:

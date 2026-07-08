@@ -2,6 +2,12 @@ from datetime import datetime, timezone
 from typing import cast
 from uuid import UUID
 
+from gql.client import (
+    GetMealLogsMealLogs,
+    GetUserUserObjectNotFoundError,
+    GetUserUserUser,
+    MealLogFilter,
+)
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QHBoxLayout,
@@ -12,7 +18,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..graphql.client import GetUser, GetUserUserUser, MealLogFilter, MealLogs
 from ..utils.gql import client
 from ..utils.nutrition import Macros, sum_macros
 from ..utils.profile import Kbzhu, calculate_kbzhu, get_uuid, profile_exists
@@ -106,7 +111,7 @@ class DailyReport(QWidget):
         self._profile_worker.start()
 
     def _on_user_loaded(self, result: object) -> None:
-        user = cast(GetUser, result).user
+        user = cast(GetUserUserUser | GetUserUserObjectNotFoundError, result)
         if not isinstance(user, GetUserUserUser):
             return
         kbzhu = calculate_kbzhu(
@@ -118,13 +123,13 @@ class DailyReport(QWidget):
         )
         target_date = datetime.now().astimezone(timezone.utc).date()
         self._worker = Worker(
-            client.meal_logs,
+            client.get_meal_logs,
             filter_=MealLogFilter(userId=user.id, dateFilter=target_date),
             limit=1000,
         )
         self._worker.finished.connect(
             lambda result: self._update_display(
-                sum_macros(cast(MealLogs, result).meal_logs), kbzhu
+                sum_macros(cast(list[GetMealLogsMealLogs], result)), kbzhu
             )
         )
         self._worker.failed.connect(self._on_error)

@@ -1,3 +1,5 @@
+import asyncio
+import inspect
 from collections.abc import Callable
 from typing import Any
 
@@ -17,6 +19,8 @@ class Worker(QThread):
     def run(self) -> None:
         try:
             result = self._fn(*self._args, **self._kwargs)
+            if inspect.iscoroutine(result):
+                result = asyncio.run(result)
             self.finished.emit(result)
         except Exception as e:
             self.failed.emit(str(e))
