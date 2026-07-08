@@ -1,8 +1,8 @@
-from datetime import time
+from datetime import date, time
 
 import strawberry
 
-from ....services.users.types import UserCreateParams, UserUpdateParams
+from ....services.users.types import UserCreateParams, UserListFilters, UserUpdateParams
 from .enums import Gender, Goal
 
 
@@ -64,4 +64,15 @@ class UpdateUserInput:
             params["notification_time"] = self.notification_time.value
         if self.hard_mod is not None:
             params["hard_mod"] = self.hard_mod.value
+        return params
+
+
+@strawberry.input
+class UsersFilterInput:
+    without_logs_on: strawberry.Maybe[date]
+
+    def to_service_params(self) -> UserListFilters:
+        params: UserListFilters = {}
+        if self.without_logs_on is not None:
+            params["without_logs_on"] = self.without_logs_on.value
         return params

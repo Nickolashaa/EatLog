@@ -1,9 +1,10 @@
 from typing import Unpack
 from uuid import UUID
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...database.models.meal_logs import MealLog
 from ...database.models.users import User
 from ..exceptions import ObjectNotFound
 from .schemas import UserSchema
@@ -37,6 +38,11 @@ class UserService:
                 stmt = stmt.where(User.telegram_id.is_not(None))
             else:
                 stmt = stmt.where(User.telegram_id.is_(None))
+        if without_logs_on := filters.get("without_logs_on"):
+            subq = select(MealLog.user_id).where(
+                func.date(MealLog.created_at) == without_logs_on
+            )
+            stmt = stmt.where(User.id.not_in(subq))
 
         res = await self.session.execute(stmt)
 

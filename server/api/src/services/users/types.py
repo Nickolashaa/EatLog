@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import date, time
 from typing import Literal, NotRequired, Required, TypedDict
 from uuid import UUID
 
@@ -34,3 +34,4 @@ class UserListFilters(TypedDict):
     ids: NotRequired[list[UUID]]
     notification_time: NotRequired[time | None]
     telegram_id_exists: NotRequired[bool]
+    without_logs_on: NotRequired[date]
