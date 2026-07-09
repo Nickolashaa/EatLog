@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('src/assets/favicon.ico', 'assets')],
+    datas=[('src/assets/favicon.ico', 'assets'), ('pyproject.toml', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

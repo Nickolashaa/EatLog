@@ -1,3 +1,4 @@
+import sys
 import tomllib
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -9,6 +10,14 @@ from ..config import GITHUB_REPO
 _PACKAGE_NAME = "eat_log_desktop"
 
 
+def _pyproject_path() -> Path:
+    """Locate pyproject.toml, both when run from source and when frozen."""
+    if getattr(sys, "frozen", False):
+        base = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+        return base / "pyproject.toml"
+    return Path(__file__).resolve().parents[2] / "pyproject.toml"
+
+
 def current_version() -> str:
     """Version the app was built with, per pyproject.toml."""
     try:
@@ -16,7 +25,7 @@ def current_version() -> str:
     except PackageNotFoundError:
         pass
 
-    pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    pyproject = _pyproject_path()
     try:
         data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
         return str(data["project"]["version"])
