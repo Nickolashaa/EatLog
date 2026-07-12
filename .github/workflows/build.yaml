@@ -27,7 +27,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Build web image
+        working-directory: client/web
         uses: docker/build-push-action@v6
         with:
-          file: ./client/web/Dockerfile
+          file: ./Dockerfile
           push: false
