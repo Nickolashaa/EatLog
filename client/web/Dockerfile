@@ -1,12 +1,16 @@
 FROM node:26 AS builder
 
-WORKDIR /app
+WORKDIR /app/client/web
 
-COPY ./package.json ./package-lock.json ./
+COPY ./client/web/package.json ./client/web/package-lock.json ./
 
 RUN npm install
 
-COPY ./ ./
+WORKDIR /app/client/web/src
+
+COPY ./client/web/ ./
+
+WORKDIR /app/client/web
 
 RUN npm run build-only
 
