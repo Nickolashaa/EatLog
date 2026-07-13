@@ -1,0 +1,11 @@
+{
+    email gracevnikolaj220@gmail.com
+}
+
+eat-log.ru {
+    reverse_proxy web:80
+}
+
+api.eat-log.ru {
+    reverse_proxy api:5285
+}
