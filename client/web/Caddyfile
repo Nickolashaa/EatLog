@@ -1,0 +1,6 @@
+:80 {
+    root * /usr/web/
+    encode zstd gzip
+    try_files {path} /index.html
+    file_server
+}
