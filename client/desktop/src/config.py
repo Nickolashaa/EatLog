@@ -8,7 +8,7 @@ def resource_path(name: str) -> str:
     return str(root / name)
 
 
-API_URL = "http://api.eat-log.ru"
+API_URL = "https://api.eat-log.ru"
 BOT_USERNAME = "eat_log_bot"
 
 GITHUB_REPO = "Nickolashaa/EatLog"
