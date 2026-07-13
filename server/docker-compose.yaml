@@ -56,9 +56,9 @@ services:
       retries: 5
       start_period: 5s
 
-  nginx:
-    image: grachevnr/eat_log_nginx:latest
-    container_name: eat_log_nginx
+  caddy:
+    image: grachevnr/eat_log_caddy:latest
+    container_name: eat_log_caddy
     ports:
       - "80:80"
       - "443:443"
