@@ -73,3 +73,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:
