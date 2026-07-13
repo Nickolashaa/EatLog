@@ -2,6 +2,10 @@
     email gracevnikolaj220@gmail.com
 }
 
+:80 {
+    respond /health 200
+}
+
 eat-log.ru {
     reverse_proxy web:80
 }
