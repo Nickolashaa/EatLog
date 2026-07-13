@@ -13,8 +13,8 @@ jobs:
         include:
           - name: api
             file: ./server/api/Dockerfile
-          - name: nginx
-            file: ./server/nginx/Dockerfile
+          - name: caddy
+            file: ./server/caddy/Dockerfile
           - name: bot
             file: ./server/bot/Dockerfile
           - name: scheduler

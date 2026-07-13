@@ -15,8 +15,8 @@ jobs:
             file: ./server/api/Dockerfile
           - name: bot
             file: ./server/bot/Dockerfile
-          - name: nginx
-            file: ./server/nginx/Dockerfile
+          - name: caddy
+            file: ./server/caddy/Dockerfile
           - name: scheduler
             file: ./server/scheduler/Dockerfile
           - name: web

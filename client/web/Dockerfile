@@ -11,8 +11,8 @@ COPY ./client/web/ ./
 RUN npm run build-only
 
 
-FROM nginx:1.31-alpine
+FROM caddy:2.11
 
-COPY ./client/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./client/web/Caddyfile /etc/caddy/Caddyfile
 
 COPY --from=builder /app/client/web/dist /usr/web/
