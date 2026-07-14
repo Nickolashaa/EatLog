@@ -1,5 +1,5 @@
 :80 {
-    root * /usr/web/
+    root * /usr/landing/
     encode zstd gzip
     try_files {path} /index.html
     file_server

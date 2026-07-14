@@ -1,18 +1,18 @@
 FROM node:26 AS builder
 
-WORKDIR /app/client/web
+WORKDIR /app/client/landing
 
-COPY ./client/web/package.json ./client/web/package-lock.json ./
+COPY ./client/landing/package.json ./client/landing/package-lock.json ./
 
 RUN npm install
 
-COPY ./client/web/ ./
+COPY ./client/landing/ ./
 
 RUN npm run build-only
 
 
 FROM caddy:2.11
 
-COPY ./client/web/Caddyfile /etc/caddy/Caddyfile
+COPY ./client/landing/Caddyfile /etc/caddy/Caddyfile
 
-COPY --from=builder /app/client/web/dist /usr/web/
+COPY --from=builder /app/client/landing/dist /usr/landing/
