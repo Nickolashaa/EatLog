@@ -47,7 +47,7 @@ services:
         condition: service_healthy
 
   web:
-    image: grachevnr/eat_log_web:latest
+    image: grachevnr/eat_log_landing:latest
     container_name: eat_log_web
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
