@@ -19,8 +19,8 @@ jobs:
             file: ./server/bot/Dockerfile
           - name: scheduler
             file: ./server/scheduler/Dockerfile
-          - name: web
-            file: ./client/web/Dockerfile
+          - name: landing
+            file: ./client/landing/Dockerfile
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
