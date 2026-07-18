@@ -57,9 +57,9 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          source: "./server/docker-compose.yaml"
+          source: "./docker-compose.yaml"
           target: "~/"
-          strip_components: 2
+          strip_components: 1
       - name: Create .env on server
         uses: appleboy/ssh-action@v1
         env:
