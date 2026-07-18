@@ -7,7 +7,7 @@
 }
 
 eat-log.ru {
-    reverse_proxy web:80
+    reverse_proxy landing:80
 }
 
 api.eat-log.ru {
