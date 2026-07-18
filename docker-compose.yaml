@@ -1,14 +1,31 @@
 services:
+  database:
+    image: postgres:18.4
+    container_name: eat_log_database
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - "database_data:/var/lib/postgresql/"
+
   api:
     image: grachevnr/eat_log_api:latest
     container_name: eat_log_api
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       BOT_TOKEN: ${BOT_TOKEN}
+    depends_on:
+      database:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5285/health')"]
       interval: 5s
@@ -74,9 +91,10 @@ services:
       retries: 5
       start_period: 5s
     volumes:
-      - caddy-data:/data
-      - caddy-config:/config
+      - caddy-data:/data/
+      - caddy-config:/config/
 
 volumes:
+  database_data:
   caddy-data:
   caddy-config:
